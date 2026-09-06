@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.toRect
@@ -25,10 +27,20 @@ import com.example.ui.MainViewModel
 import com.example.ui.components.AppBottomNav
 import com.example.ui.components.AppTopBar
 import com.example.ui.components.EditDayTaskDialog
+import com.example.ui.components.PlanSetupDialog
+import com.example.ui.components.QuestionFeedbackDialog
+import com.example.ui.screens.AudioFlashcardsScreen
+import com.example.ui.screens.BacSimulatorScreen
 import com.example.ui.screens.DashboardScreen
+import com.example.ui.screens.LoginScreen
+import com.example.ui.screens.LandingPageScreen
+import com.example.ui.screens.AccountScreen
+import com.example.ui.screens.DuelBattleScreen
 import com.example.ui.screens.ElevationChartScreen
 import com.example.ui.screens.FocusModeScreen
+import com.example.ui.screens.MistakeVaultScreen
 import com.example.ui.screens.QuestionsBankScreen
+import com.example.ui.screens.SmartRescuePlannerScreen
 import com.example.ui.screens.StudyPlanScreen
 import com.example.ui.theme.MutafawweqTheme
 
@@ -42,17 +54,43 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val planConfig by viewModel.planConfig.collectAsStateWithLifecycle()
             val stats by viewModel.overallStats.collectAsStateWithLifecycle()
             val elevationList by viewModel.elevationStats.collectAsStateWithLifecycle()
             val subjectProgressList by viewModel.subjectProgressList.collectAsStateWithLifecycle()
             val allProgress by viewModel.allProgress.collectAsStateWithLifecycle()
             val focusSessions by viewModel.focusSessions.collectAsStateWithLifecycle()
             val allQuestions by viewModel.allQuestions.collectAsStateWithLifecycle()
+            val feedbacks by viewModel.allQuestionFeedbacks.collectAsStateWithLifecycle()
             val customDayTasks by viewModel.customDayTasks.collectAsStateWithLifecycle()
             val mergedDayTasks by viewModel.mergedDayTasks.collectAsStateWithLifecycle()
 
             MutafawweqTheme {
-                // Grayscale Filter Box Wrapper for complete black-and-white visual discipline
+                val prefs = remember { getSharedPreferences("student_auth_prefs", MODE_PRIVATE) }
+                var isLoggedIn by remember {
+                    mutableStateOf(prefs.getBoolean("is_logged_in", false))
+                }
+                var authRoute by remember { mutableStateOf("landing") }
+
+                if (!isLoggedIn) {
+                    when (authRoute) {
+                        "landing" -> LandingPageScreen(
+                            onNavigateToLogin = { authRoute = "login" },
+                            onNavigateToSignUp = { authRoute = "signup" }
+                        )
+                        "login" -> LoginScreen(
+                            initialIsSignUp = false,
+                            onLoginSuccess = { _ -> isLoggedIn = true },
+                            onBackToLanding = { authRoute = "landing" }
+                        )
+                        "signup" -> LoginScreen(
+                            initialIsSignUp = true,
+                            onLoginSuccess = { _ -> isLoggedIn = true },
+                            onBackToLanding = { authRoute = "landing" }
+                        )
+                    }
+                } else {
+                    // Grayscale Filter Box Wrapper for complete black-and-white visual discipline
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -80,6 +118,8 @@ class MainActivity : ComponentActivity() {
                                 AppTopBar(
                                     streakDays = stats.streakDays,
                                     isGrayscale = uiState.isGrayscaleEnabled,
+                                    stream = planConfig.stream,
+                                    onStreamClick = { viewModel.openPlanSetupDialog() },
                                     onToggleGrayscale = { viewModel.toggleGrayscale() },
                                     onQuickFocusClick = { viewModel.setTab(AppTab.FOCUS) }
                                 )
@@ -105,6 +145,8 @@ class MainActivity : ComponentActivity() {
                                         stats = stats,
                                         elevationList = elevationList,
                                         progressList = allProgress,
+                                        planConfig = planConfig,
+                                        onChangePlanClick = { viewModel.openPlanSetupDialog() },
                                         onNavigateToTab = { viewModel.setTab(it) },
                                         onSelectMonth = { viewModel.setSelectedMonth(it) },
                                         onStartFocus = { viewModel.setTab(AppTab.FOCUS) },
@@ -126,6 +168,8 @@ class MainActivity : ComponentActivity() {
                                         selectedSubjectFilter = uiState.selectedSubjectFilter,
                                         searchQuery = uiState.searchQuery,
                                         progressList = allProgress,
+                                        planConfig = planConfig,
+                                        onChangePlanClick = { viewModel.openPlanSetupDialog() },
                                         onSelectMonth = { viewModel.setSelectedMonth(it) },
                                         onSelectWeek = { viewModel.setSelectedWeek(it) },
                                         onSetSubjectFilter = { viewModel.setSubjectFilter(it) },
@@ -154,7 +198,9 @@ class MainActivity : ComponentActivity() {
                                         onSelectDifficultyFilter = { viewModel.setQuestionDifficultyFilter(it) },
                                         onSearchQueryChange = { viewModel.setQuestionsSearchQuery(it) },
                                         onToggleStar = { id, curr -> viewModel.toggleQuestionStar(id, curr) },
-                                        onAnswerQuestion = { q, ans -> viewModel.answerQuestion(q, ans) }
+                                        onAnswerQuestion = { q, ans -> viewModel.answerQuestion(q, ans) },
+                                        onOpenFeedback = { q, ans -> viewModel.openFeedbackDialog(q, ans) },
+                                        feedbacks = feedbacks
                                     )
                                 }
 
@@ -188,6 +234,44 @@ class MainActivity : ComponentActivity() {
                                         onDismissLock = { viewModel.dismissFocusLock() }
                                     )
                                 }
+
+                                AppTab.MISTAKE_VAULT -> {
+                                    MistakeVaultScreen(
+                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                    )
+                                }
+
+                                AppTab.BAC_SIMULATOR -> {
+                                    BacSimulatorScreen(
+                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                    )
+                                }
+
+                                AppTab.DUEL_BATTLES -> {
+                                    DuelBattleScreen(
+                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                    )
+                                }
+
+                                AppTab.RESCUE_PLANNER -> {
+                                    SmartRescuePlannerScreen(
+                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                    )
+                                }
+
+                                AppTab.AUDIO_FLASHCARDS -> {
+                                    AudioFlashcardsScreen(
+                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                    )
+                                }
+
+                                AppTab.ACCOUNT -> {
+                                    AccountScreen(
+                                        onLogout = {
+                                            recreate()
+                                        }
+                                    )
+                                }
                             }
 
                             // Student Edit Day Task Dialog
@@ -204,11 +288,36 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
+                            // Intensive Study Plan Configuration Dialog
+                            if (uiState.isPlanSetupDialogOpen) {
+                                PlanSetupDialog(
+                                    initialConfig = planConfig,
+                                    canDismiss = planConfig.isConfigured,
+                                    onDismissRequest = { viewModel.closePlanSetupDialog() },
+                                    onConfirmConfig = { newConfig ->
+                                        viewModel.applyPlanConfig(newConfig)
+                                    }
+                                )
+                            }
+
+                            // Question Feedback / Error Report Dialog (Student side note)
+                            if (uiState.isFeedbackDialogOpen && uiState.feedbackTargetQuestion != null) {
+                                QuestionFeedbackDialog(
+                                    question = uiState.feedbackTargetQuestion!!,
+                                    currentSelectedAnswer = uiState.feedbackSelectedOption,
+                                    onDismiss = { viewModel.closeFeedbackDialog() },
+                                    onSubmitFeedback = { reason, note, selectedOption ->
+                                        viewModel.submitQuestionFeedback(reason, note, selectedOption)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
 }
 

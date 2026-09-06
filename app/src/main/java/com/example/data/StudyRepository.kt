@@ -3,6 +3,7 @@ package com.example.data
 import com.example.data.db.CustomDayTaskEntity
 import com.example.data.db.FocusSessionEntity
 import com.example.data.db.QuestionEntity
+import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.db.StudyDao
 import com.example.data.db.StudyProgressEntity
 import com.example.data.models.DayTask
@@ -36,6 +37,7 @@ class StudyRepository(private val dao: StudyDao) {
     val totalFocusMinutes: Flow<Int?> = dao.getTotalFocusMinutes()
     val allQuestions: Flow<List<QuestionEntity>> = dao.getAllQuestions()
     val allCustomDayTasks: Flow<List<CustomDayTaskEntity>> = dao.getAllCustomDayTasks()
+    val allQuestionFeedbacks: Flow<List<QuestionFeedbackEntity>> = dao.getAllFeedbacks()
 
     suspend fun seedQuestionsIfEmpty() {
         val count = dao.getQuestionsCount()
@@ -300,6 +302,19 @@ class StudyRepository(private val dao: StudyDao) {
 
     suspend fun resetAllCustomTasks() {
         dao.resetAllCustomDayTasks()
+    }
+
+    // --- Question Feedbacks & Error Reports (Admin Control) ---
+    suspend fun submitQuestionFeedback(feedback: QuestionFeedbackEntity): Long {
+        return dao.insertFeedback(feedback)
+    }
+
+    suspend fun updateFeedbackStatus(id: Long, status: String, adminReply: String = "") {
+        dao.updateFeedbackStatus(id, status, adminReply)
+    }
+
+    suspend fun deleteFeedback(id: Long) {
+        dao.deleteFeedback(id)
     }
 }
 

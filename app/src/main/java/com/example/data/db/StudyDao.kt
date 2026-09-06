@@ -79,5 +79,21 @@ interface StudyDao {
 
     @Query("DELETE FROM custom_day_tasks")
     suspend fun resetAllCustomDayTasks()
+
+    // --- Question Feedbacks & Error Reports (Admin Control) ---
+    @Query("SELECT * FROM question_feedbacks ORDER BY timestamp DESC")
+    fun getAllFeedbacks(): Flow<List<QuestionFeedbackEntity>>
+
+    @Query("SELECT * FROM question_feedbacks WHERE questionId = :questionId ORDER BY timestamp DESC")
+    fun getFeedbacksForQuestion(questionId: Long): Flow<List<QuestionFeedbackEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFeedback(feedback: QuestionFeedbackEntity): Long
+
+    @Query("UPDATE question_feedbacks SET status = :status, adminReply = :reply WHERE id = :id")
+    suspend fun updateFeedbackStatus(id: Long, status: String, reply: String)
+
+    @Query("DELETE FROM question_feedbacks WHERE id = :id")
+    suspend fun deleteFeedback(id: Long)
 }
 

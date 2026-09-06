@@ -30,12 +30,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.LockClock
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
@@ -50,11 +53,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,16 +86,24 @@ import com.example.data.db.StudyProgressEntity
 import com.example.data.models.DayTask
 import com.example.data.models.ElevationStat
 import com.example.data.models.MonthInfo
+import com.example.data.models.PlanConfig
 import com.example.ui.AppTab
 import com.example.ui.theme.AmberGold500
 import com.example.ui.theme.EmeraldSuccess500
 import com.example.ui.theme.RoyalBlue600
+
+enum class DashboardTab(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    OVERVIEW("نظرة عامة والمهام", Icons.Default.Dashboard),
+    RECHARTS_EVOLUTION("تطور المستوى (Recharts) 📈", Icons.Default.AutoGraph)
+}
 
 @Composable
 fun DashboardScreen(
     stats: OverallStats,
     elevationList: List<ElevationStat>,
     progressList: List<StudyProgressEntity>,
+    planConfig: PlanConfig = StudyPlanData.currentConfig,
+    onChangePlanClick: () -> Unit = {},
     onNavigateToTab: (AppTab) -> Unit,
     onSelectMonth: (Int) -> Unit,
     onStartFocus: () -> Unit,
@@ -98,6 +115,7 @@ fun DashboardScreen(
     onToggleAllDay: ((String, Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    var currentDashboardTab by remember { mutableStateOf(DashboardTab.OVERVIEW) }
     val progressMap = remember(progressList) { progressList.associateBy { it.dayId } }
 
     val animatedOverall by animateFloatAsState(
@@ -123,13 +141,55 @@ fun DashboardScreen(
     val isActiveAllDone = activeProgress.period1Done && activeProgress.period2Done &&
             activeProgress.period3Done && activeProgress.cardsDone && activeProgress.recitationDone
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
-    ) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Dashboard TabRow: Overview vs Recharts Evolution
+        Surface(
+            tonalElevation = 2.dp,
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TabRow(
+                selectedTabIndex = currentDashboardTab.ordinal,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = RoyalBlue600,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dashboard_sub_tabs")
+            ) {
+                DashboardTab.values().forEach { tab ->
+                    val isSelected = currentDashboardTab == tab
+                    Tab(
+                        selected = isSelected,
+                        onClick = { currentDashboardTab = tab },
+                        text = {
+                            Text(
+                                text = tab.title,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = tab.title,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        modifier = Modifier.testTag("dashboard_tab_${tab.name.lowercase()}")
+                    )
+                }
+            }
+        }
+
+        when (currentDashboardTab) {
+            DashboardTab.OVERVIEW -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
+                ) {
         // Hero Study Banner Card
         item {
             Card(
@@ -174,7 +234,7 @@ fun DashboardScreen(
                             color = AmberGold500.copy(alpha = 0.95f)
                         ) {
                             Text(
-                                text = "خطة الـ 7 إلى 9 أشهر • بكالوريا علمي",
+                                text = "${planConfig.stream.title} • ${planConfig.totalDays} يوماً مكثفاً",
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = Color.Black,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -188,6 +248,65 @@ fun DashboardScreen(
                                 color = Color.White
                             )
                         )
+                    }
+                }
+            }
+        }
+
+        // Active Dynamic Plan Card & Configuration Action
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onChangePlanClick() }
+                    .testTag("plan_stream_config_card"),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${planConfig.stream.badge} ${planConfig.stream.shortName}",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "${planConfig.totalDays} يوماً محصوراً",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = "المنهاج موزع بدقة على الأيام • اضغط هنا لتغيير الصف أو تعديل التواريخ",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Button(
+                        onClick = onChangePlanClick,
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RoyalBlue600)
+                    ) {
+                        Text("تعديل الخطة", style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -359,6 +478,21 @@ fun DashboardScreen(
                             Text("جدول الارتفاع")
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { currentDashboardTab = DashboardTab.RECHARTS_EVOLUTION },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("btn_open_recharts_evolution"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RoyalBlue600)
+                    ) {
+                        Icon(imageVector = Icons.Default.AutoGraph, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("رسم بياني لتطور المستوى بـ Recharts 📈", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -481,7 +615,7 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "أشهر الخطة الدراسية (9 أشهر)",
+                    text = "مراحل وفترات الخطة (${StudyPlanData.months.size} فترات • ${planConfig.totalDays} يوماً)",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -506,6 +640,17 @@ fun DashboardScreen(
                     onNavigateToTab(AppTab.PLAN)
                 }
             )
+        }
+    }
+            }
+
+            DashboardTab.RECHARTS_EVOLUTION -> {
+                RechartsEvolutionTab(
+                    stats = stats,
+                    elevationList = elevationList,
+                    progressList = progressList
+                )
+            }
         }
     }
 }

@@ -23,11 +23,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.db.QuestionEntity
+import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.models.Subject
 import com.example.ui.theme.AmberGold500
 import com.example.ui.theme.EmeraldSuccess500 as EmeraldSuccess
@@ -80,6 +83,8 @@ fun QuestionsBankScreen(
     onSearchQueryChange: (String) -> Unit,
     onToggleStar: (Long, Boolean) -> Unit,
     onAnswerQuestion: (QuestionEntity, String) -> Unit,
+    onOpenFeedback: (QuestionEntity, String?) -> Unit,
+    feedbacks: List<QuestionFeedbackEntity> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     // Filter questions based on student selections
@@ -361,10 +366,15 @@ fun QuestionsBankScreen(
             } else {
                 // Questions List
                 items(filteredQuestions, key = { it.id }) { question ->
+                    val questionFeedbacks = feedbacks.filter { it.questionId == question.id }
+                    val latestFeedback = questionFeedbacks.firstOrNull()
                     QuestionItemCard(
                         question = question,
                         onToggleStar = { onToggleStar(question.id, question.isStarred) },
-                        onAnswerSelected = { option -> onAnswerQuestion(question, option) }
+                        onAnswerSelected = { option -> onAnswerQuestion(question, option) },
+                        onOpenFeedback = { onOpenFeedback(question, question.userSelectedAnswer) },
+                        hasFeedback = questionFeedbacks.isNotEmpty(),
+                        feedbackStatus = latestFeedback?.status
                     )
                 }
             }
@@ -377,6 +387,9 @@ fun QuestionItemCard(
     question: QuestionEntity,
     onToggleStar: () -> Unit,
     onAnswerSelected: (String) -> Unit,
+    onOpenFeedback: () -> Unit,
+    hasFeedback: Boolean = false,
+    feedbackStatus: String? = null,
     modifier: Modifier = Modifier
 ) {
     val subjectEnum = try {
@@ -400,7 +413,7 @@ fun QuestionItemCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Top Row: Subject Badge + Topic + Difficulty + Star
+            // Top Row: Subject Badge + Topic + Difficulty + Note to Admin + Star
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -457,16 +470,62 @@ fun QuestionItemCard(
                     }
                 }
 
-                // Star / Bookmark Button
-                IconButton(
-                    onClick = onToggleStar,
-                    modifier = Modifier.size(36.dp).testTag("star_question_${question.id}")
+                // Actions: Note to Admin & Star
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Icon(
-                        imageVector = if (question.isStarred) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = "حفظ السؤال",
-                        tint = if (question.isStarred) AmberGold500 else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Side Note / Error Report to Admin Button
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (hasFeedback) EmeraldSuccess.copy(alpha = 0.15f) else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+                        border = BorderStroke(
+                            1.dp,
+                            if (hasFeedback) EmeraldSuccess else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onOpenFeedback() }
+                            .testTag("note_btn_${question.id}")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.EditNote,
+                                contentDescription = "ملاحظة",
+                                tint = if (hasFeedback) EmeraldSuccess else MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = when (feedbackStatus) {
+                                    "FIXED" -> "تم التصحيح ✓"
+                                    "REVIEWED" -> "تم الفحص 🔵"
+                                    "PENDING" -> "الملاحظة أرسلت 📩"
+                                    else -> "ملاحظة 📝"
+                                },
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                ),
+                                color = if (hasFeedback) EmeraldSuccess else MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+
+                    // Star / Bookmark Button
+                    IconButton(
+                        onClick = onToggleStar,
+                        modifier = Modifier.size(36.dp).testTag("star_question_${question.id}")
+                    ) {
+                        Icon(
+                            imageVector = if (question.isStarred) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = "حفظ السؤال",
+                            tint = if (question.isStarred) AmberGold500 else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -496,6 +555,27 @@ fun QuestionItemCard(
 
             // MCQ Options or Essay Answer
             if (question.questionType == "MCQ") {
+                // Header clarifying single choice selection
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "خيارات الإجابة (اختر إجابة واحدة فقط):",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (question.userSelectedAnswer != null) {
+                        Text(
+                            text = "إجابتك المختارة: الخيار ${question.userSelectedAnswer}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+
                 val options = listOf(
                     "A" to question.optionA,
                     "B" to question.optionB,

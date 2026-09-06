@@ -20,6 +20,9 @@ val AmberGold100 = Color(0xFFFEF3C7)
 val EmeraldSuccess500 = Color(0xFF10B981)
 val EmeraldSuccess100 = Color(0xFFD1FAE5)
 
+val CrimsonError500 = Color(0xFFEF4444)
+val CrimsonError100 = Color(0xFFFEE2E2)
+
 val SlateBackgroundLight = Color(0xFFF8FAFC)
 val CardSurfaceLight = Color(0xFFFFFFFF)
 

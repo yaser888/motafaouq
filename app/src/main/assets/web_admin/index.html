@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم المشرف السحابية | متفوق (Web Admin)</title>
-  <!-- Google Fonts: Tajawal & Cairo -->
+  <title>لوحة تحكم المشرف السحابية | تطبيق متفوق (Web Admin)</title>
+  <!-- Google Fonts: Cairo & Tajawal -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
     header {
       background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
       border-bottom: 1px solid var(--card-border);
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -107,7 +107,7 @@
     }
 
     nav.sidebar {
-      width: 250px;
+      width: 260px;
       background: #131D31;
       border-left: 1px solid var(--card-border);
       padding: 1.25rem 0.75rem;
@@ -148,7 +148,7 @@
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
-      max-width: 1150px;
+      max-width: 1180px;
       margin: 0 auto;
       width: 100%;
     }
@@ -235,7 +235,7 @@
 
     .questions-list { display: flex; flex-direction: column; gap: 16px; }
 
-    /* Normal & Confidence Styled Cards */
+    /* Card styling */
     .q-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -249,7 +249,6 @@
       border-color: rgba(59, 130, 246, 0.5);
     }
 
-    /* Card States for Confidence */
     .q-card-high {
       border-color: rgba(16, 185, 129, 0.45);
       background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, #1E293B 100%);
@@ -265,6 +264,11 @@
       border: 2px solid #E11D48 !important;
       background: linear-gradient(180deg, rgba(225, 29, 72, 0.12) 0%, #1E293B 100%) !important;
       box-shadow: 0 0 25px rgba(225, 29, 72, 0.25);
+    }
+
+    .q-card-mistake {
+      border-right: 5px solid #EF4444;
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, #1E293B 100%);
     }
 
     /* Badges */
@@ -308,7 +312,6 @@
       50% { box-shadow: 0 0 14px rgba(225, 29, 72, 0.5); }
     }
 
-    /* Warning Banner Inside Card */
     .review-alert-banner {
       background: rgba(225, 29, 72, 0.2);
       border: 1px solid rgba(225, 29, 72, 0.6);
@@ -322,8 +325,17 @@
       font-size: 0.88rem;
     }
 
-    .review-alert-banner strong {
-      color: #FFF;
+    .pedagogical-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: #FDE68A;
+      font-size: 0.88rem;
     }
 
     .confidence-meter {
@@ -354,6 +366,7 @@
     .q-opt { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 8px 12px; font-size: 0.9rem; }
     .q-opt.correct { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #34D399; font-weight: 700; }
     .q-opt.needs-check { border-color: #E11D48; background: rgba(225, 29, 72, 0.15); color: #FDA4AF; }
+    .q-opt.trap { border-color: #EF4444; background: rgba(239, 68, 68, 0.18); color: #FCA5A5; font-weight: 700; }
     .q-explanation { background: rgba(59, 130, 246, 0.1); border-right: 4px solid #3B82F6; padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: #BFDBFE; line-height: 1.5; }
 
     .form-group { margin-bottom: 1.25rem; }
@@ -405,6 +418,33 @@
       color: white;
     }
 
+    /* Source Selector Tabs */
+    .source-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .source-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: #131D31;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .source-tab.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.3));
+      border-color: #3B82F6;
+      color: #93C5FD;
+    }
+
     /* Drag & Drop Upload Zone */
     .upload-zone {
       border: 2px dashed #3B82F6;
@@ -414,12 +454,67 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
+      position: relative;
     }
 
     .upload-zone:hover {
       background: rgba(59, 130, 246, 0.1);
       border-color: #60A5FA;
     }
+
+    /* Image Preview with OCR Scanner Animation */
+    .image-preview-container {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      background: #0F172A;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-img {
+      max-height: 220px;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      object-fit: contain;
+    }
+
+    .ocr-scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #3B82F6, #60A5FA, transparent);
+      box-shadow: 0 0 12px #3B82F6;
+      animation: scanAnim 2s infinite ease-in-out;
+      display: none;
+    }
+
+    @keyframes scanAnim {
+      0% { top: 0%; opacity: 0.2; }
+      50% { top: 90%; opacity: 1; }
+      100% { top: 0%; opacity: 0.2; }
+    }
+
+    /* Error Bar Styles */
+    .error-rate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+    .error-critical { background: rgba(239, 68, 68, 0.2); border: 1px solid #EF4444; color: #FCA5A5; }
+    .error-high { background: rgba(245, 158, 11, 0.2); border: 1px solid #F59E0B; color: #FCD34D; }
+    .error-medium { background: rgba(59, 130, 246, 0.2); border: 1px solid #3B82F6; color: #93C5FD; }
 
     @media (max-width: 768px) {
       .app-container { flex-direction: column; }
@@ -435,7 +530,7 @@
       <div class="brand-logo">🎓</div>
       <div class="brand-title">
         <h1>لوحة تحكم المشرف السحابية | متفوق (Web Admin)</h1>
-        <p>إدارة بنك الأسئلة واستخراج الامتحانات السحابية</p>
+        <p>إدارة بنك الأسئلة واستخراج الامتحانات وتحليلات أخطاء الطلاب</p>
       </div>
     </div>
     <div class="status-badge">
@@ -447,8 +542,9 @@
   <div class="app-container">
     <nav class="sidebar">
       <button class="nav-btn active" onclick="switchTab('dashboard')">📊 نظرة عامة</button>
-      <button class="nav-btn" onclick="switchTab('pdf-extractor')">📄 استخراج PDF مع فحص الثقة ✨</button>
-      <button class="nav-btn" onclick="switchTab('questions')">📚 بنك الأسئلة</button>
+      <button class="nav-btn" onclick="switchTab('pdf-extractor')">📄 استخراج PDF والصور 📷</button>
+      <button class="nav-btn" onclick="switchTab('student-analytics')">📉 أخطاء الطلاب والتحليلات 🎯</button>
+      <button class="nav-btn" onclick="switchTab('questions')">📚 بنك الأسئلة السحابي</button>
       <button class="nav-btn" onclick="switchTab('announcements')">📢 الإعلانات السحابية</button>
     </nav>
 
@@ -467,14 +563,14 @@
             <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #34D399;">✨</div>
             <div class="stat-info">
               <h3 id="stat-pdf-q">3</h3>
-              <p>مستخرج من PDF</p>
+              <p>مستخرج من PDF/صور</p>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(225, 29, 72, 0.2); color: #FDA4AF;">⚠️</div>
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5;">📉</div>
             <div class="stat-info">
-              <h3 id="stat-review-needed">1</h3>
-              <p>تحتاج مراجعة دقيقة</p>
+              <h3>34.8%</h3>
+              <p>معدل أخطاء الطلاب</p>
             </div>
           </div>
           <div class="stat-card">
@@ -490,38 +586,69 @@
           <h2><span>🚀</span> إجراءات المشرف السريعة</h2>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          <div class="q-card" style="cursor: pointer; border-color: rgba(239, 68, 68, 0.4);" onclick="switchTab('student-analytics')">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <h3 style="color: #F87171;">📉 تحليلات أخطاء الطلاب والمفاهيم الحرجة</h3>
+              <span class="badge" style="background: rgba(239,68,68,0.2); color:#FCA5A5;">إحصائيات ذكية 🔥</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">استعراض أكثر الأسئلة تعثراً بين الطلاب، مع تحليل الفخاخ الشائعة وأسباب الخطأ لبث إرشادات سريعة لهم.</p>
+          </div>
           <div class="q-card" style="cursor: pointer; border-color: rgba(59, 130, 246, 0.4);" onclick="switchTab('pdf-extractor')">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <h3 style="color: #60A5FA;">📄 استخراج أسئلة PDF بالذكاء الاصطناعي</h3>
-              <span class="badge" style="background: rgba(59,130,246,0.2); color:#60A5FA;">جديد ✨</span>
+              <h3 style="color: #60A5FA;">📄 استخراج من PDF وصور الامتحانات (OCR)</h3>
+              <span class="badge" style="background: rgba(59,130,246,0.2); color:#60A5FA;">دعم JPG/PNG ✨</span>
             </div>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">ارفع امتحانات البكالوريا، حلل نسبة الثقة (Confidence score)، وراجع الأسئلة المنخفضة الدقة قبل النشر.</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">ارفع امتحانات البكالوريا أو صور أوراق الاختبار بالهاتف، وسيقوم الـ OCR بالتعرف على النصوص والمعادلات وحساب نسبة الثقة قبل النشر.</p>
           </div>
           <div class="q-card" style="cursor: pointer;" onclick="switchTab('questions')">
             <h3 style="color: #34D399;">📚 إدارة بنك الأسئلة</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">تعديل وحذف الأسئلة الحالية ومراقبة إجابات وشروحات المواد.</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">تعديل وحذف الأسئلة الحالية ومراقبة إجابات وشروحات المواد وسلالم التنقيط.</p>
           </div>
         </div>
       </section>
 
-      <!-- TAB 2: PDF EXTRACTOR (WITH CONFIDENCE SCORE & MANUAL REVIEW HIGHLIGHTS) -->
+      <!-- TAB 2: PDF & IMAGE EXTRACTOR -->
       <section id="tab-pdf-extractor" class="tab-content">
         <div class="section-header">
           <div>
-            <h2><span>📄</span> استخراج وتحليل الأسئلة من PDF بالذكاء الاصطناعي</h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">يقوم النظام بفحص النص والخيارات وحساب **نسبة الثقة (Confidence Score)** مع تلوين الأسئلة التي تحتاج لمراجعة يدوية دقيقة باللون المميز.</p>
+            <h2><span>📄</span> استخراج الأسئلة من PDF وصور الامتحانات بالذكاء الاصطناعي (OCR)</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">ارفع ملف PDF أو صورة امتحان (JPG / PNG)، وسيقوم النموذج بفحص ومعالجة النصوص وحساب **نسبة الثقة (Confidence Score)** مع تمييز الأسئلة للمراجعة.</p>
+          </div>
+        </div>
+
+        <!-- Source Selector -->
+        <div class="source-selector">
+          <div class="source-tab active" id="source-tab-pdf" onclick="selectUploadSource('pdf')">
+            📄 ملف امتحان PDF
+          </div>
+          <div class="source-tab" id="source-tab-image" onclick="selectUploadSource('image')">
+            📷 صورة امتحان (JPG / PNG / لقطة هاتف)
+          </div>
+          <div class="source-tab" id="source-tab-sample" onclick="selectUploadSource('sample')">
+            📚 نماذج بكالوريا وزارية جاهزة
           </div>
         </div>
 
         <!-- Extraction Options & Upload Zone -->
         <div class="q-card" style="margin-bottom: 1.5rem;">
-          <div class="upload-zone" onclick="document.getElementById('pdf-file-input').click()">
-            <div style="font-size: 38px; margin-bottom: 8px;">📑</div>
-            <h3 style="color: #60A5FA; margin-bottom: 4px;">اضغط هنا لرفع ملف الامتحان (PDF) أو اختر نموذجاً جاهزاً أدناه</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">يدعم ملفات امتحانات البكالوريا الرسمية، التمارين، وسلالم التصحيح النموذجية</p>
-            <input type="file" id="pdf-file-input" style="display: none;" accept="application/pdf" onchange="handleFileUpload(event)">
+          <div class="upload-zone" id="upload-drop-zone" onclick="triggerFileInput()">
+            <div id="upload-icon-display" style="font-size: 40px; margin-bottom: 8px;">📄</div>
+            <h3 id="upload-title-text" style="color: #60A5FA; margin-bottom: 4px;">اضغط هنا لرفع ملف الامتحان (PDF أو صورة JPG / PNG)</h3>
+            <p id="upload-subtitle-text" style="color: var(--text-muted); font-size: 0.85rem;">يدعم ملفات PDF، وصور الامتحانات المصورة بالكاميرا أو الماسح الضوئي (JPG, PNG, WEBP)</p>
+            <input type="file" id="general-file-input" style="display: none;" accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp" onchange="handleGeneralFileUpload(event)">
           </div>
 
+          <!-- Image Preview with OCR Scanner Animation -->
+          <div class="image-preview-container" id="image-preview-box" style="display: none;">
+            <div class="ocr-scan-line" id="ocr-scanner-line"></div>
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #93C5FD;" id="preview-filename-text">🖼️ صورة ورقة الامتحان</span>
+              <span class="badge" style="background: rgba(59,130,246,0.2); color: #60A5FA;" id="ocr-status-badge">جاري تحليل OCR والتعرف الضوئي...</span>
+            </div>
+            <img id="image-preview-element" class="preview-img" src="" alt="ورقة الامتحان">
+          </div>
+
+          <!-- Subject & Options Selector -->
           <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 1.25rem;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <label style="font-size: 0.85rem; font-weight: 700; color: #CBD5E1;">المادة:</label>
@@ -537,7 +664,7 @@
               </select>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;" id="sample-model-container">
               <label style="font-size: 0.85rem; font-weight: 700; color: #CBD5E1;">النموذج الوزاري:</label>
               <select id="extractor-template" class="form-control" style="width: auto; min-width: 220px;">
                 <option value="bac_2024_math">بكالوريا 2024 - مادة الرياضيات (شعبة علوم)</option>
@@ -552,12 +679,11 @@
 
         <!-- Extraction Results View -->
         <div id="extraction-results-area" style="display: none;">
-          <!-- Top Stats & Confidence Breakdown -->
           <div class="q-card" style="margin-bottom: 1.25rem; background: #131D31; border-color: rgba(59, 130, 246, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h3 id="extracted-count-title" style="color: #FFF; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                  <span>🎯</span> تم استخراج <span id="total-extracted-count">3</span> أسئلة من الملف
+                  <span>🎯</span> تم استخراج <span id="total-extracted-count">3</span> أسئلة من المصدر المرفوع
                 </h3>
                 <p id="extracted-summary-text" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 3px;">
                   معدل الثقة الإجمالي: <strong id="avg-conf-text" style="color: #34D399;">84%</strong> • يوجد <strong id="review-count-badge" style="color: #FDA4AF;">سؤال 1</strong> يحتاج مراجعة يدوية دقيقة.
@@ -578,12 +704,73 @@
             </div>
           </div>
 
-          <!-- Extracted Questions List -->
           <div id="extracted-questions-container" class="questions-list"></div>
         </div>
       </section>
 
-      <!-- TAB 3: QUESTIONS BANK -->
+      <!-- TAB 3: STUDENT ERROR ANALYTICS (NEW TAB) -->
+      <section id="tab-student-analytics" class="tab-content">
+        <div class="section-header">
+          <div>
+            <h2><span>📉</span> إحصائيات أكثر الأسئلة التي يخطئ فيها الطلاب</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">تحليل بيداغوجي وإحصائي لمعدلات تعثر الطلاب وأبرز الإجابات الخاطئة (الفخاخ) لتوجيه النصائح للطلاب.</p>
+          </div>
+          <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5; font-size: 0.85rem; padding: 6px 12px;">
+            🔴 محاكاة بيانات حية لـ 1,420 اختبار
+          </span>
+        </div>
+
+        <!-- Overview Analytics KPI Cards -->
+        <div class="stats-grid">
+          <div class="stat-card" style="border-color: rgba(239, 68, 68, 0.3);">
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: #EF4444;">🎯</div>
+            <div class="stat-info">
+              <h3>78%</h3>
+              <p>أعلى نسبة خطأ (التكامل)</p>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color: rgba(245, 158, 11, 0.3);">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #F59E0B;">📐</div>
+            <div class="stat-info">
+              <h3>الرياضيات</h3>
+              <p>أكثر مادة فيها أخطاء</p>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color: rgba(59, 130, 246, 0.3);">
+            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #3B82F6;">👥</div>
+            <div class="stat-info">
+              <h3>1,420</h3>
+              <p>إجمالي محاولات الحل</p>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.3);">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">💡</div>
+            <div class="stat-info">
+              <h3>5 أسئلة</h3>
+              <p>بحاجة لتنبيه توجيهي</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Pills for Mistake Questions -->
+        <div class="q-card" style="margin-bottom: 1.25rem; background: #131D31;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <span style="font-size: 0.9rem; font-weight: 700; color: #CBD5E1;">تصفية الأسئلة حسب المادة:</span>
+            <div class="filter-pills" style="margin-bottom: 0;">
+              <div class="pill active" id="mistake-filter-all" onclick="filterMistakes('ALL')">جميع المواد (5)</div>
+              <div class="pill" id="mistake-filter-math" onclick="filterMistakes('MATH')">الرياضيات (2)</div>
+              <div class="pill" id="mistake-filter-physics" onclick="filterMistakes('PHYSICS')">الفيزياء (1)</div>
+              <div class="pill" id="mistake-filter-science" onclick="filterMistakes('SCIENCE')">العلوم (1)</div>
+              <div class="pill" id="mistake-filter-arabic" onclick="filterMistakes('ARABIC')">اللغة العربية (1)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mistakes List Container -->
+        <div id="mistakes-questions-container" class="questions-list"></div>
+      </section>
+
+      <!-- TAB 4: QUESTIONS BANK -->
       <section id="tab-questions" class="tab-content">
         <div class="section-header">
           <h2><span>📚</span> بنك الأسئلة السحابي للطلاب</h2>
@@ -592,7 +779,7 @@
         <div id="cloud-questions-container" class="questions-list"></div>
       </section>
 
-      <!-- TAB 4: ANNOUNCEMENTS -->
+      <!-- TAB 5: ANNOUNCEMENTS -->
       <section id="tab-announcements" class="tab-content">
         <div class="section-header">
           <h2><span>📢</span> إذاعة الإعلانات للطلاب</h2>
@@ -660,9 +847,105 @@
       }
     ];
 
-    // Extracted Questions from PDF with Confidence Analysis
+    // Simulated Analytics for Most Mistaken Questions by Students
+    let studentMistakesData = [
+      {
+        id: "mistake_1",
+        subject: "MATH",
+        unitOrTopic: "التكامل وحساب المساحات والدوال الأصلية",
+        questionText: "قيمة التكامل I = ∫[0 إلى 1] (2x / (x² + 1)) dx تساوي بدقة:",
+        optionA: "ln(2)",
+        optionB: "ln(3)",
+        optionC: "2 ln(2)",
+        optionD: "1/2 ln(2)",
+        correctAnswer: "A",
+        trapOption: "B",
+        errorRate: 78,
+        totalAttempts: 438,
+        wrongAttempts: 342,
+        trapChoicePct: 61,
+        rootCause: "يخطئ 61% من الطلاب في تعويض حدود التكامل [0 إلى 1] معتقدين أن ln(1)=1 بدلاً من 0، أو ينسون شكل المشتق u'(x)/u(x) ويختارون الخيار B بدلاً من A.",
+        recommendedAdvice: "تذكير بقاعدة التكامل للدوال من الشكل u'/u مع التأكيد على أن ln(1)=0 دائماً."
+      },
+      {
+        id: "mistake_2",
+        subject: "PHYSICS",
+        unitOrTopic: "الظواهر الكهربائية ودارة RC والمكثفات",
+        questionText: "في دارة RC، ثابت الزمن τ يساوي بالجداء، ووحدته في النظام الدولي هي:",
+        optionA: "R × C (الثانية s)",
+        optionB: "R / C (الأوم Ω)",
+        optionC: "C / R (الفاراد F)",
+        optionD: "1 / (RC) (الهرتز Hz)",
+        correctAnswer: "A",
+        trapOption: "D",
+        errorRate: 68,
+        totalAttempts: 395,
+        wrongAttempts: 269,
+        trapChoicePct: 45,
+        rootCause: "يخلط 45% من الطلاب بين ثابت الزمن τ والتردد أو مقلوب الزمن، فيختارون الخيار D (1/RC) عن طريق الخطأ السريع.",
+        recommendedAdvice: "التركيز على التحليل البعدي لثابت الزمن وإثبات أنه متجانس مع الزمن [T] = [R].[C]."
+      },
+      {
+        id: "mistake_3",
+        subject: "MATH",
+        unitOrTopic: "المتتاليات العددية والبرهان بالتراجع",
+        questionText: "المتتالية الحسابية (Un) التي حدها الأول u1 = 3 وأساسها r = 2، قيمة حدها العاشر u10 هي:",
+        optionA: "21",
+        optionB: "23",
+        optionC: "20",
+        optionD: "18",
+        correctAnswer: "A",
+        trapOption: "B",
+        errorRate: 64,
+        totalAttempts: 512,
+        wrongAttempts: 328,
+        trapChoicePct: 53,
+        rootCause: "يقع 53% من الطلاب في فخ تطبيق عبارة Un = u0 + n.r مباشرة معتبرين u10 = 3 + 10(2) = 23، متجاهلين أن الحد الأول بدأ من u1 وليس u0.",
+        recommendedAdvice: "تنبيه الطلاب دوماً لفحص رتبة الحد الأول (u0 أم u1) عند كتابة عبارة الحد العام un = up + (n-p)r."
+      },
+      {
+        id: "mistake_4",
+        subject: "SCIENCE",
+        unitOrTopic: "آليات تركيب البروتين والترجمة والنسخ",
+        questionText: "تتم عملية الترجمة عند حقيقيات النوى في:",
+        optionA: "الهيولى (السيتوبلازم) على مستوى الريبوزومات",
+        optionB: "داخل النواة فقط",
+        optionC: "داخل جهاز غولجي فقط",
+        optionD: "في الغشاء الهيولي الخارجي",
+        correctAnswer: "A",
+        trapOption: "B",
+        errorRate: 59,
+        totalAttempts: 310,
+        wrongAttempts: 183,
+        trapChoicePct: 41,
+        rootCause: "عدم الفصل الدقيق بين مرحلتي التعبير المورثي: الاستنساخ الذي يحدث بالنواة، والترجمة التي تتم في الهيولى.",
+        recommendedAdvice: "مراجعة مخطط التعبير المورثي وربط كل ظاهرة بمقرها الخلوي المحدد."
+      },
+      {
+        id: "mistake_5",
+        subject: "ARABIC",
+        unitOrTopic: "إعراب الجمل والقواعد النحوية",
+        questionText: "في جملة: 'وقف المعلم يشرح الدرس'، الجملة الفعلية (يشرح الدرس) في محل:",
+        optionA: "نصب حال",
+        optionB: "رفع خبر",
+        optionC: "نعت",
+        optionD: "لا محل لها من الإعراب",
+        correctAnswer: "A",
+        trapOption: "C",
+        errorRate: 52,
+        totalAttempts: 280,
+        wrongAttempts: 146,
+        trapChoicePct: 48,
+        rootCause: "تطبيق قاعدة 'الجمل بعد النكرات صفات وبعد المعارف أحوال' بشكل متعجل دون الانتباه لتعريف كلمة 'المعلم' بـ ال.",
+        recommendedAdvice: "تطبيق قاعدة المعارف والأحوال والتفريق بين النعت والحال بحسب صاحب الحال."
+      }
+    ];
+
     let extracted = [];
     let currentFilter = 'ALL';
+    let currentMistakeFilter = 'ALL';
+    let currentSourceType = 'pdf';
+    let currentUploadedImageSrc = null;
 
     let announcements = [
       { title: "تحديث بنك الأسئلة", message: "تمت إضافة نماذج وحلول وزارية جديدة في الرياضيات والفيزياء." }
@@ -672,25 +955,88 @@
       document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
       document.getElementById('tab-' + id).classList.add('active');
-      event.currentTarget.classList.add('active');
+      
+      const buttons = document.querySelectorAll('.nav-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(id)) {
+          btn.classList.add('active');
+        }
+      });
     }
 
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        alert(`تم اختيار الملف: ${file.name} 📑\nجاري بدء تحليل OCR والذكاء الاصطناعي...`);
-        startExtraction(file.name);
+    function selectUploadSource(type) {
+      currentSourceType = type;
+      document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+      if (type === 'pdf') {
+        document.getElementById('source-tab-pdf').classList.add('active');
+        document.getElementById('upload-icon-display').innerText = "📄";
+        document.getElementById('upload-title-text').innerText = "اضغط هنا لرفع ملف الامتحان (PDF)";
+        document.getElementById('upload-subtitle-text').innerText = "يدعم ملفات PDF للامتحانات الرسمية والتمارين";
+      } else if (type === 'image') {
+        document.getElementById('source-tab-image').classList.add('active');
+        document.getElementById('upload-icon-display').innerText = "📷";
+        document.getElementById('upload-title-text').innerText = "اضغط هنا لرفع صورة ورقة الامتحان (JPG / PNG)";
+        document.getElementById('upload-subtitle-text').innerText = "يدعم الصور الملتقطة بكاميرا الهاتف أو الماسح الضوئي بجودة عالية";
+      } else {
+        document.getElementById('source-tab-sample').classList.add('active');
+        document.getElementById('upload-icon-display').innerText = "📚";
+        document.getElementById('upload-title-text').innerText = "تم اختيار النماذج الوزارية الجاهزة";
+        document.getElementById('upload-subtitle-text').innerText = "اختر المادة والنموذج واضغط على زر بدء الاستخراج أدناه";
       }
     }
 
-    function startExtraction(customFileName) {
+    function triggerFileInput() {
+      document.getElementById('general-file-input').click();
+    }
+
+    function handleGeneralFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const isImage = file.type.startsWith('image/');
+      const previewBox = document.getElementById('image-preview-box');
+      const previewImg = document.getElementById('image-preview-element');
+      const scannerLine = document.getElementById('ocr-scanner-line');
+      const statusBadge = document.getElementById('ocr-status-badge');
+      const filenameText = document.getElementById('preview-filename-text');
+
+      if (isImage) {
+        currentSourceType = 'image';
+        document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('source-tab-image').classList.add('active');
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentUploadedImageSrc = e.target.result;
+          previewImg.src = currentUploadedImageSrc;
+          previewBox.style.display = 'flex';
+          scannerLine.style.display = 'block';
+          filenameText.innerText = `🖼️ تم رفع صورة الامتحان: ${file.name} (${Math.round(file.size/1024)} KB)`;
+          statusBadge.innerText = 'جاري إجراء المعالجة البصرية OCR... ⚡';
+
+          setTimeout(() => {
+            scannerLine.style.display = 'none';
+            statusBadge.innerText = '✅ تم التعرف على النصوص والرموز الرياضية!';
+            startExtraction(file.name, true);
+          }, 1200);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewBox.style.display = 'none';
+        currentUploadedImageSrc = null;
+        alert(`تم اختيار ملف PDF: ${file.name} 📑\nجاري تحليل محتوى الامتحان...`);
+        startExtraction(file.name, false);
+      }
+    }
+
+    function startExtraction(customFileName, isFromImage = false) {
       const subject = document.getElementById('extractor-subject').value;
       
-      // Generate questions with varied realistic confidence scores
       extracted = [
         {
           id: "ext_1",
           subject: subject,
+          sourceType: isFromImage ? "📷 صورة JPG/PNG" : "📄 ملف PDF",
           unitOrTopic: "المتتاليات العددية والتراجع",
           questionText: "المتتالية الحسابية (Un) التي حدها الأول u1 = 3 وأساسها r = 2، قيمة حدها العاشر u10 هي:",
           optionA: "21",
@@ -699,7 +1045,7 @@
           optionD: "18",
           correctAnswer: "A",
           explanation: "عبارة الحد العام لمتتالية حسابية: Un = Up + (n - p)r => u10 = 3 + (10 - 1) × 2 = 3 + 18 = 21.",
-          confidenceScore: 97, // High Confidence
+          confidenceScore: 97,
           needsReview: false,
           reviewReasons: [],
           isVerified: false
@@ -707,6 +1053,7 @@
         {
           id: "ext_2",
           subject: subject,
+          sourceType: isFromImage ? "📷 صورة JPG/PNG" : "📄 ملف PDF",
           unitOrTopic: "الأعداد المركبة والتحويلات النقطية",
           questionText: "في المستوي المركب المنسوب إلى معلم متعامد ومتجانس، لاحقة النقطة A هي zA = 1 + i√3. الشكل الأسي للعدد المركب zA هو:",
           optionA: "2 e^(i π/3)",
@@ -715,7 +1062,7 @@
           optionD: "e^(i π/3)",
           correctAnswer: "A",
           explanation: "الطويلة |zA| = √(1 + 3) = 2. العمدة: cos θ = 1/2, sin θ = √3/2 => θ = π/3. إذن zA = 2 e^(i π/3).",
-          confidenceScore: 91, // High Confidence
+          confidenceScore: 91,
           needsReview: false,
           reviewReasons: [],
           isVerified: false
@@ -723,6 +1070,7 @@
         {
           id: "ext_3",
           subject: subject,
+          sourceType: isFromImage ? "📷 صورة JPG/PNG" : "📄 ملف PDF",
           unitOrTopic: "التكامل وحساب المساحات والدوال الأصلية",
           questionText: "قيمة التكامل I = ∫[0 إلى 1] (2x / (x² + 1)) dx تساوي بدقة:",
           optionA: "ln(2)",
@@ -731,10 +1079,12 @@
           optionD: "1/2 ln(2)",
           correctAnswer: "A",
           explanation: "الدالة من الشكل u'(x)/u(x) حيث u(x) = x² + 1. إذن الدالة الأصلية هي ln(x² + 1). بالتعويض: ln(2) - ln(1) = ln(2).",
-          confidenceScore: 58, // LOW CONFIDENCE - NEEDS CAREFUL MANUAL REVIEW
+          confidenceScore: isFromImage ? 64 : 58,
           needsReview: true,
           reviewReasons: [
-            "رمز التكامل ∫ وحدود التكامل [0 إلى 1] مستخرجة من صورة ضبابية في ملف الـ PDF الأصلي.",
+            isFromImage 
+              ? "تحليل OCR للصورة: تم رصد انحناء خفيف في زاوية الورقة عند رمز التكامل ∫، يرجى التأكد من مطابقة الحدود [0 إلى 1]."
+              : "رمز التكامل ∫ وحدود التكامل [0 إلى 1] مستخرجة من سطر ضبابي في ملف الـ PDF الأصلي.",
             "يرجى التأكد من تطابق رمز الكسر (2x / (x² + 1)) وصحة الخيار المعتمد A قبل النشر للطالب."
           ],
           isVerified: false
@@ -746,7 +1096,6 @@
     }
 
     function updateExtractedUI() {
-      // Calculate stats
       const total = extracted.length;
       const reviewNeeded = extracted.filter(q => q.needsReview && !q.isVerified).length;
       const highConf = extracted.filter(q => q.confidenceScore >= 85 || q.isVerified).length;
@@ -756,7 +1105,6 @@
       document.getElementById('pill-all-count').innerText = total;
       document.getElementById('pill-review-count').innerText = reviewNeeded;
       document.getElementById('pill-high-count').innerText = highConf;
-      document.getElementById('stat-review-needed').innerText = reviewNeeded;
       document.getElementById('avg-conf-text').innerText = `${avgConf}%`;
 
       const reviewBadge = document.getElementById('review-count-badge');
@@ -773,7 +1121,7 @@
 
     function filterExtracted(filterType) {
       currentFilter = filterType;
-      document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('#tab-pdf-extractor .filter-pills .pill').forEach(p => p.classList.remove('active'));
       if (filterType === 'ALL') document.getElementById('filter-all-pill').classList.add('active');
       if (filterType === 'REVIEW_NEEDED') document.getElementById('filter-review-pill').classList.add('active');
       if (filterType === 'HIGH') document.getElementById('filter-high-pill').classList.add('active');
@@ -798,7 +1146,7 @@
         return;
       }
 
-      container.innerHTML = filtered.map((q, idx) => {
+      container.innerHTML = filtered.map((q) => {
         const score = q.isVerified ? 100 : q.confidenceScore;
         const isNeedsReview = q.needsReview && !q.isVerified;
 
@@ -831,14 +1179,13 @@
 
         return `
           <div class="${cardClass}" id="extracted-card-${q.id}">
-            <!-- Header Row: Subject + Topic + Confidence Score Indicator -->
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
               <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <span class="badge badge-${q.subject.toLowerCase()}">${q.subject}</span>
+                <span style="background:rgba(255,255,255,0.06); padding:3px 8px; border-radius:6px; font-size:0.78rem; color:#CBD5E1;">${q.sourceType || '📄 مستخرج'}</span>
                 <span style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">${q.unitOrTopic}</span>
               </div>
 
-              <!-- Confidence Score Badge with Meter -->
               <div style="display:flex; align-items:center; gap:8px;">
                 <div class="confidence-meter">
                   <div class="meter-bar-bg">
@@ -852,7 +1199,6 @@
               </div>
             </div>
 
-            <!-- Warning Banner if Card Needs Review -->
             ${isNeedsReview ? `
               <div class="review-alert-banner">
                 <span style="font-size: 20px;">⚠️</span>
@@ -865,38 +1211,26 @@
               </div>
             ` : ''}
 
-            <!-- Editable / Displayable Question Text -->
             <div style="margin: 10px 0;">
               <label style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">نص السؤال:</label>
               <div class="q-text" id="q-text-view-${q.id}">${q.questionText}</div>
               <textarea class="form-control" id="q-text-input-${q.id}" style="display:none; margin-top:4px;" onchange="updateQuestionField('${q.id}', 'questionText', this.value)">${q.questionText}</textarea>
             </div>
 
-            <!-- Options Grid -->
             <div style="margin: 10px 0;">
-              <label style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">خيارات الإجابة المتعددة (حدد الإجابة الصحيحة):</label>
+              <label style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">خيارات الإجابة المتعددة:</label>
               <div class="q-options">
-                <div class="q-opt ${q.correctAnswer === 'A' ? 'correct' : ''} ${isNeedsReview && q.correctAnswer === 'A' ? 'needs-check' : ''}">
-                  (A) <span id="optA-text-${q.id}">${q.optionA}</span>
-                </div>
-                <div class="q-opt ${q.correctAnswer === 'B' ? 'correct' : ''}">
-                  (B) <span id="optB-text-${q.id}">${q.optionB}</span>
-                </div>
-                <div class="q-opt ${q.correctAnswer === 'C' ? 'correct' : ''}">
-                  (C) <span id="optC-text-${q.id}">${q.optionC}</span>
-                </div>
-                <div class="q-opt ${q.correctAnswer === 'D' ? 'correct' : ''}">
-                  (D) <span id="optD-text-${q.id}">${q.optionD}</span>
-                </div>
+                <div class="q-opt ${q.correctAnswer === 'A' ? 'correct' : ''}">(A) ${q.optionA}</div>
+                <div class="q-opt ${q.correctAnswer === 'B' ? 'correct' : ''}">(B) ${q.optionB}</div>
+                <div class="q-opt ${q.correctAnswer === 'C' ? 'correct' : ''}">(C) ${q.optionC}</div>
+                <div class="q-opt ${q.correctAnswer === 'D' ? 'correct' : ''}">(D) ${q.optionD}</div>
               </div>
             </div>
 
-            <!-- Explanation -->
             <div class="q-explanation">
               <strong>💡 الشرح وسلم التصحيح:</strong> ${q.explanation}
             </div>
 
-            <!-- Card Actions Toolbar -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; gap:8px;">
               <div style="display:flex; gap:8px;">
                 ${!q.isVerified ? `
@@ -904,7 +1238,7 @@
                     ✅ اعتماد وتأكيد صحة السؤال
                   </button>
                 ` : `
-                  <span style="color:#34D399; font-size:0.85rem; font-weight:700; display:flex; align-items:center; gap:4px;">
+                  <span style="color:#34D399; font-size:0.85rem; font-weight:700;">
                     ✨ تم الاعتماد بنجاح
                   </span>
                 `}
@@ -920,6 +1254,131 @@
           </div>
         `;
       }).join('');
+    }
+
+    // STUDENT MISTAKES ANALYTICS FUNCTIONS
+    function filterMistakes(subject) {
+      currentMistakeFilter = subject;
+      document.querySelectorAll('#tab-student-analytics .filter-pills .pill').forEach(p => p.classList.remove('active'));
+      
+      if (subject === 'ALL') document.getElementById('mistake-filter-all').classList.add('active');
+      if (subject === 'MATH') document.getElementById('mistake-filter-math').classList.add('active');
+      if (subject === 'PHYSICS') document.getElementById('mistake-filter-physics').classList.add('active');
+      if (subject === 'SCIENCE') document.getElementById('mistake-filter-science').classList.add('active');
+      if (subject === 'ARABIC') document.getElementById('mistake-filter-arabic').classList.add('active');
+
+      renderStudentMistakesList();
+    }
+
+    function renderStudentMistakesList() {
+      const container = document.getElementById('mistakes-questions-container');
+      const filtered = studentMistakesData.filter(m => {
+        if (currentMistakeFilter === 'ALL') return true;
+        return m.subject === currentMistakeFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="q-card" style="text-align:center; padding: 2.5rem;">
+            <p style="color:var(--text-muted); font-size:1rem;">لا توجد أسئلة مسجلة لهذه المادة في عينة التحليل الحالية.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((m) => {
+        let badgeStyle = "error-critical";
+        let severityText = "🚨 نسبة خطأ حرجة جداً";
+        if (m.errorRate < 60) {
+          badgeStyle = "error-medium";
+          severityText = "🟡 نسبة خطأ متوسطة";
+        } else if (m.errorRate < 70) {
+          badgeStyle = "error-high";
+          severityText = "⚠️ نسبة خطأ مرتفعة";
+        }
+
+        return `
+          <div class="q-card q-card-mistake">
+            <!-- Header: Subject, Topic, Error rate badge -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span class="badge badge-${m.subject.toLowerCase()}">${m.subject}</span>
+                <span style="color:#FFF; font-weight:700; font-size:0.95rem;">${m.unitOrTopic}</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="error-rate-badge ${badgeStyle}">
+                  <span>${severityText} (${m.errorRate}% تعثر)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual Progress Bar for Failure Rate -->
+            <div style="margin: 12px 0 8px 0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">
+                <span>👥 ${m.wrongAttempts} طالب أخطأوا من أصل ${m.totalAttempts} محاولة</span>
+                <strong style="color:#F87171;">${m.errorRate}% نسبة الخطأ الإجمالية</strong>
+              </div>
+              <div style="height:8px; background:#334155; border-radius:4px; overflow:hidden;">
+                <div style="width:${m.errorRate}%; height:100%; background:linear-gradient(90deg, #F59E0B, #EF4444); border-radius:4px;"></div>
+              </div>
+            </div>
+
+            <!-- Question Text -->
+            <div class="q-text" style="color:#F1F5F9; margin: 10px 0;">
+              ${m.questionText}
+            </div>
+
+            <!-- Options Grid with Correct vs Trap highlight -->
+            <div class="q-options">
+              <div class="q-opt ${m.correctAnswer === 'A' ? 'correct' : ''} ${m.trapOption === 'A' ? 'trap' : ''}">
+                (A) ${m.optionA} ${m.correctAnswer === 'A' ? '✅ (الإجابة الصحيحة)' : ''} ${m.trapOption === 'A' ? '❌ (فخ شائع)' : ''}
+              </div>
+              <div class="q-opt ${m.correctAnswer === 'B' ? 'correct' : ''} ${m.trapOption === 'B' ? 'trap' : ''}">
+                (B) ${m.optionB} ${m.correctAnswer === 'B' ? '✅ (الإجابة الصحيحة)' : ''} ${m.trapOption === 'B' ? '❌ (فخ شائع اختاره '+m.trapChoicePct+'%)' : ''}
+              </div>
+              <div class="q-opt ${m.correctAnswer === 'C' ? 'correct' : ''} ${m.trapOption === 'C' ? 'trap' : ''}">
+                (C) ${m.optionC} ${m.correctAnswer === 'C' ? '✅ (الإجابة الصحيحة)' : ''} ${m.trapOption === 'C' ? '❌ (فخ شائع)' : ''}
+              </div>
+              <div class="q-opt ${m.correctAnswer === 'D' ? 'correct' : ''} ${m.trapOption === 'D' ? 'trap' : ''}">
+                (D) ${m.optionD} ${m.correctAnswer === 'D' ? '✅ (الإجابة الصحيحة)' : ''} ${m.trapOption === 'D' ? '❌ (فخ شائع اختاره '+m.trapChoicePct+'%)' : ''}
+              </div>
+            </div>
+
+            <!-- Pedagogical Analysis Banner -->
+            <div class="pedagogical-banner">
+              <span style="font-size:22px;">💡</span>
+              <div>
+                <strong style="color:#FBBF24;">التحليل البيداغوجي لأسباب تعثر الطلاب:</strong>
+                <p style="margin-top:4px; font-size:0.88rem; line-height:1.5; color:#FEF3C7;">${m.rootCause}</p>
+              </div>
+            </div>
+
+            <!-- Action Toolbar for Teacher/Supervisor -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; gap:8px;">
+              <span style="color:var(--text-muted); font-size:0.85rem;">
+                📌 <strong>نصيحة التدعيم:</strong> ${m.recommendedAdvice}
+              </span>
+
+              <button class="btn btn-warning btn-sm" onclick="broadcastAdviceForQuestion('${m.id}')">
+                📢 إذاعة تنبيه وإرشاد للطلاب
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function broadcastAdviceForQuestion(mistakeId) {
+      const item = studentMistakesData.find(m => m.id === mistakeId);
+      if (!item) return;
+
+      switchTab('announcements');
+      document.getElementById('announcement-title').value = `توجيه وإرشاد في مادة ${item.subject}: ${item.unitOrTopic}`;
+      document.getElementById('announcement-msg').value = `تنبيه هام للطلبة الأعزاء بخصوص السؤال: "${item.questionText}"\n\n📌 نصيحة للتفوق: ${item.recommendedAdvice}\n💡 سبب الفخ الشائع: ${item.rootCause}`;
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert('تم تجهيز نص الإعلان التوجيهي بناءً على هذا السؤال! يمكنك مراجعته والضغط على نشر فوراً.');
     }
 
     function markQuestionAsVerified(qId) {
@@ -985,7 +1444,6 @@
       renderQuestions();
       document.getElementById('stat-total-q').innerText = questions.length;
       document.getElementById('stat-pdf-q').innerText = questions.length - 1;
-      document.getElementById('stat-review-needed').innerText = 0;
       alert('🚀 تم نشر الأسئلة بنجاح إلى بنك أسئلة الطلاب في تطبيق متفوق!');
     }
 
@@ -1057,6 +1515,7 @@
     window.onload = () => {
       renderQuestions();
       renderAnnouncements();
+      renderStudentMistakesList();
     };
   </script>
 </body>

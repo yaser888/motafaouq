@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterBAndW
 import androidx.compose.material.icons.filled.LightMode
@@ -34,6 +36,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.models.EducationalStream
 import com.example.ui.theme.AmberGold500
 import com.example.ui.theme.RoyalBlue600
 
@@ -41,6 +44,8 @@ import com.example.ui.theme.RoyalBlue600
 fun AppTopBar(
     streakDays: Int,
     isGrayscale: Boolean,
+    stream: EducationalStream = EducationalStream.BAC_SCIENTIFIC,
+    onStreamClick: () -> Unit = {},
     onToggleGrayscale: () -> Unit,
     onQuickFocusClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -59,7 +64,7 @@ fun AppTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // App Title & Brand
+            // App Title & Brand + Stream Badge
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.testTag("app_brand_header")
@@ -79,26 +84,41 @@ fun AppTopBar(
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                Row(verticalAlignment = Alignment.Bottom) {
+                Column {
                     Text(
                         text = "مُتَفَوِّق",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
+                            fontSize = 20.sp
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "خطة البكالوريا",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 2.dp)
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onStreamClick() }
+                            .testTag("current_stream_chip")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${stream.badge} ${stream.shortName} ▾",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
 
-            // Quick Actions: Streak + Grayscale Switcher + Quick Focus
+            // Quick Actions: Streak + Grayscale Switcher + Admin Panel + Quick Focus
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

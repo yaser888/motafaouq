@@ -2,6 +2,7 @@ package com.example.data.cloud
 
 import android.util.Log
 import com.example.data.db.QuestionEntity
+import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.models.Subject
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -28,6 +29,7 @@ object FirebaseCloudSync {
     private const val COLLECTION_QUESTIONS = "questions_bank"
     private const val COLLECTION_ANNOUNCEMENTS = "announcements"
     private const val COLLECTION_APP_CONFIG = "app_config"
+    private const val COLLECTION_FEEDBACKS = "question_feedbacks"
 
     private val firestore: FirebaseFirestore? by lazy {
         try {
@@ -218,6 +220,32 @@ object FirebaseCloudSync {
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching announcements", e)
             emptyList()
+        }
+    }
+
+    /**
+     * Upload student's question feedback to Cloud Firestore
+     */
+    suspend fun uploadStudentFeedback(feedback: QuestionFeedbackEntity): Boolean = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext false
+        try {
+            val docId = if (feedback.id > 0) "fb_${feedback.id}" else "fb_${System.currentTimeMillis()}"
+            val map = hashMapOf(
+                "questionId" to feedback.questionId,
+                "questionText" to feedback.questionText,
+                "subject" to feedback.subject,
+                "selectedOption" to feedback.selectedOption,
+                "feedbackReason" to feedback.feedbackReason,
+                "noteText" to feedback.noteText,
+                "status" to feedback.status,
+                "adminReply" to feedback.adminReply,
+                "timestamp" to feedback.timestamp
+            )
+            db.collection(COLLECTION_FEEDBACKS).document(docId).set(map, SetOptions.merge()).await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error uploading feedback to cloud", e)
+            false
         }
     }
 }

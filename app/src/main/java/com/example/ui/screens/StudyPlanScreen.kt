@@ -85,10 +85,14 @@ import com.example.data.StudyPlanData
 import com.example.data.db.CustomDayTaskEntity
 import com.example.data.db.StudyProgressEntity
 import com.example.data.models.DayTask
+import com.example.data.models.PlanConfig
 import com.example.data.models.Subject
 import com.example.ui.theme.AmberGold500
 import com.example.ui.theme.EmeraldSuccess500
 import com.example.ui.theme.RoyalBlue600
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun StudyPlanScreen(
@@ -112,12 +116,22 @@ fun StudyPlanScreen(
     onSaveNote: (String, String) -> Unit,
     onOpenEditTask: (DayTask) -> Unit,
     onResetAllCustomTasks: () -> Unit,
+    planConfig: PlanConfig = StudyPlanData.currentConfig,
+    onChangePlanClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val progressMap = remember(progressList) { progressList.associateBy { it.dayId } }
     val customMap = remember(customDayTasks) { customDayTasks.associateBy { it.dayId } }
     val currentMonthInfo = StudyPlanData.months.firstOrNull { it.monthNumber == selectedMonth }
         ?: StudyPlanData.months.first()
+
+    val arabicDateFormatter = remember {
+        SimpleDateFormat("d MMMM yyyy", Locale("ar"))
+    }
+
+    val allowedStreamSubjects = remember(planConfig.stream) {
+        planConfig.stream.subjects
+    }
 
     var activeNoteDayId by remember { mutableStateOf<String?>(null) }
     var activeNoteText by remember { mutableStateOf("") }
@@ -249,11 +263,65 @@ fun StudyPlanScreen(
             }
         }
 
+        // Active Intensive Plan Summary & Stream Card
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onChangePlanClick() }
+                    .testTag("study_plan_stream_banner"),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${planConfig.stream.badge} ${planConfig.stream.title}",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "من ${arabicDateFormatter.format(Date(planConfig.startDateMillis))} إلى ${arabicDateFormatter.format(Date(planConfig.endDateMillis))} (${planConfig.totalDays} يوماً محصوراً)",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 11.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "توزيع متوازن ومكثف للمواد • اضغط لتعديل التواريخ أو تغيير المرحلة",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Button(
+                        onClick = onChangePlanClick,
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RoyalBlue600)
+                    ) {
+                        Text("إعادة ضبط", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+
         // Month Selector Carousel
         item {
             Column {
                 Text(
-                    text = "اختر الشهر الدراسي (الخطة المتصاعدة):",
+                    text = "اختر الفترة أو المرحلة الدراسية (${StudyPlanData.months.size} فترات):",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -401,7 +469,7 @@ fun StudyPlanScreen(
                             )
                         )
                     }
-                    items(Subject.entries.filter { it != Subject.GENERAL }) { subject ->
+                    items(Subject.entries.filter { it in allowedStreamSubjects && it != Subject.GENERAL }) { subject ->
                         FilterChip(
                             selected = selectedSubjectFilter == subject,
                             onClick = {

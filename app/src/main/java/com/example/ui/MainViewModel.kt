@@ -4,19 +4,23 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.cloud.CloudAnnouncement
+import com.example.data.cloud.CloudSyncManager
 import com.example.data.cloud.FirebaseCloudSync
 import com.example.data.db.AppDatabase
 import com.example.data.OverallStats
+import com.example.data.PlanPreferences
 import com.example.data.StudyPlanData
 import com.example.data.StudyRepository
 import com.example.data.SubjectProgress
 import com.example.data.db.CustomDayTaskEntity
 import com.example.data.db.FocusSessionEntity
 import com.example.data.db.QuestionEntity
+import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.db.StudyProgressEntity
 import com.example.data.models.DayTask
 import com.example.data.models.ElevationStat
 import com.example.data.models.MonthInfo
+import com.example.data.models.PlanConfig
 import com.example.data.models.Subject
 import com.example.focus.FocusAudioPlayer
 import com.example.focus.FocusSoundType
@@ -35,7 +39,13 @@ enum class AppTab(val title: String, val icon: String) {
     PLAN("جدول الخطة", "calendar_month"),
     QUESTIONS("بنك الأسئلة", "quiz"),
     ELEVATION("نسبة الارتفاع", "trending_up"),
-    FOCUS("وضع التركيز", "lock_clock")
+    FOCUS("وضع التركيز", "lock_clock"),
+    ACCOUNT("حسابي", "person"),
+    MISTAKE_VAULT("دفتر الأخطاء", "psychology"),
+    BAC_SIMULATOR("محاكي البكالوريا", "hourglass_top"),
+    DUEL_BATTLES("تحدي الأقران", "flash_on"),
+    RESCUE_PLANNER("مخطط الإنقاذ", "auto_graph"),
+    AUDIO_FLASHCARDS("كبسولات الحفظ", "headphones")
 }
 
 data class UiState(
@@ -62,7 +72,13 @@ data class UiState(
     val cloudAnnouncements: List<CloudAnnouncement> = emptyList(),
     // Custom Student Study Plan State
     val isEditDayTaskDialogOpen: Boolean = false,
-    val editingDayTask: DayTask? = null
+    val editingDayTask: DayTask? = null,
+    val isPlanSetupDialogOpen: Boolean = false,
+    // Question Feedback & Admin Panel State
+    val isFeedbackDialogOpen: Boolean = false,
+    val feedbackTargetQuestion: QuestionEntity? = null,
+    val feedbackSelectedOption: String? = null,
+    val isAdminPanelOpen: Boolean = false
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -70,6 +86,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
     private val repository = StudyRepository(db.studyDao())
     private val audioPlayer = FocusAudioPlayer()
+    private val planPrefs = PlanPreferences(application)
+
+    private val _planConfig = MutableStateFlow(planPrefs.getPlanConfig())
+    val planConfig: StateFlow<PlanConfig> = _planConfig.asStateFlow()
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -77,6 +97,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var timerJob: Job? = null
 
     init {
+        CloudSyncManager.init(application)
+        // Initialize StudyPlanData with saved student configuration
+        val savedConfig = planPrefs.getPlanConfig()
+        StudyPlanData.configurePlan(savedConfig)
+        if (!savedConfig.isConfigured) {
+            _uiState.value = _uiState.value.copy(isPlanSetupDialogOpen = true)
+        }
+
         viewModelScope.launch {
             repository.seedQuestionsIfEmpty()
             syncFromCloud()
@@ -93,16 +121,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val allQuestions: StateFlow<List<QuestionEntity>> = repository.allQuestions
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val mergedDayTasks: StateFlow<List<DayTask>> = repository.allCustomDayTasks
-        .combine(MutableStateFlow(Unit)) { customTasks, _ ->
-            repository.getMergedDayTasks(customTasks)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StudyPlanData.allTasks)
+    val allQuestionFeedbacks: StateFlow<List<QuestionFeedbackEntity>> = repository.allQuestionFeedbacks
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val mergedDayTasks: StateFlow<List<DayTask>> = combine(
+        repository.allCustomDayTasks,
+        _planConfig
+    ) { customTasks, _ ->
+        repository.getMergedDayTasks(customTasks)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StudyPlanData.allTasks)
 
     val overallStats: StateFlow<OverallStats> = combine(
         repository.allProgress,
         repository.totalFocusMinutes,
-        repository.allCustomDayTasks
-    ) { progressList, totalMinutes, customTasks ->
+        repository.allCustomDayTasks,
+        _planConfig
+    ) { progressList, totalMinutes, customTasks, _ ->
         val base = repository.getOverallStats(progressList, customTasks)
         base.copy(totalFocusHours = ((totalMinutes ?: 0) / 60f))
     }.stateIn(
@@ -113,20 +147,41 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val elevationStats: StateFlow<List<ElevationStat>> = combine(
         repository.allProgress,
-        repository.allCustomDayTasks
-    ) { progressList, customTasks ->
+        repository.allCustomDayTasks,
+        _planConfig
+    ) { progressList, customTasks, _ ->
         repository.getElevationStats(progressList, customTasks)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val subjectProgressList: StateFlow<List<SubjectProgress>> = combine(
         repository.allProgress,
-        repository.allCustomDayTasks
-    ) { progressList, customTasks ->
+        repository.allCustomDayTasks,
+        _planConfig
+    ) { progressList, customTasks, _ ->
         repository.getSubjectProgressList(progressList, customTasks)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val focusSessions: StateFlow<List<FocusSessionEntity>> = repository.focusSessions
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun openPlanSetupDialog() {
+        _uiState.value = _uiState.value.copy(isPlanSetupDialogOpen = true)
+    }
+
+    fun closePlanSetupDialog() {
+        _uiState.value = _uiState.value.copy(isPlanSetupDialogOpen = false)
+    }
+
+    fun applyPlanConfig(newConfig: PlanConfig) {
+        planPrefs.savePlanConfig(newConfig)
+        StudyPlanData.configurePlan(newConfig)
+        _planConfig.value = newConfig
+        _uiState.value = _uiState.value.copy(
+            isPlanSetupDialogOpen = false,
+            selectedMonth = 1,
+            selectedWeek = 1
+        )
+    }
 
     fun setTab(tab: AppTab) {
         _uiState.value = _uiState.value.copy(currentTab = tab)
@@ -288,18 +343,65 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // --- Question Feedback & Student Reports (Side Note) ---
+    fun openFeedbackDialog(question: QuestionEntity, selectedOption: String? = null) {
+        _uiState.value = _uiState.value.copy(
+            isFeedbackDialogOpen = true,
+            feedbackTargetQuestion = question,
+            feedbackSelectedOption = selectedOption ?: question.userSelectedAnswer
+        )
+    }
+
+    fun closeFeedbackDialog() {
+        _uiState.value = _uiState.value.copy(
+            isFeedbackDialogOpen = false,
+            feedbackTargetQuestion = null,
+            feedbackSelectedOption = null
+        )
+    }
+
+    fun submitQuestionFeedback(reason: String, note: String, selectedOption: String?) {
+        val targetQ = _uiState.value.feedbackTargetQuestion ?: return
+        viewModelScope.launch {
+            val feedbackEntity = QuestionFeedbackEntity(
+                questionId = targetQ.id,
+                questionText = targetQ.questionText,
+                subject = targetQ.subject,
+                selectedOption = selectedOption,
+                feedbackReason = reason,
+                noteText = note,
+                status = "PENDING"
+            )
+            // 1. Save locally in device database (offline-first)
+            repository.submitQuestionFeedback(feedbackEntity)
+
+            // 2. Upload to Vercel/Cloud in background
+            CloudSyncManager.submitFeedback(feedbackEntity)
+
+            if (selectedOption != null) {
+                answerQuestion(targetQ, selectedOption)
+            }
+            closeFeedbackDialog()
+        }
+    }
+
+    // --- Cloud Sync Controller ---
+    fun setVercelCloudUrl(url: String) {
+        CloudSyncManager.setVercelUrl(getApplication(), url)
+        syncFromCloud()
+    }
+
     fun syncFromCloud() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isCloudSyncing = true)
             try {
-                val cloudQuestions = FirebaseCloudSync.fetchCloudQuestions()
-                if (cloudQuestions.isNotEmpty()) {
-                    repository.addQuestions(cloudQuestions)
-                }
-                val announcements = FirebaseCloudSync.fetchAnnouncements()
+                // Sync questions from Vercel / Cloud into local Room DB
+                val addedCount = CloudSyncManager.syncQuestions(repository)
+                val announcements = CloudSyncManager.fetchAnnouncements()
+
                 _uiState.value = _uiState.value.copy(
                     cloudAnnouncements = announcements,
-                    cloudSyncStatus = if (FirebaseCloudSync.isCloudAvailable) "متزامن مع السحابة 🟢" else "يعمل في الوضع المحلي ⚡",
+                    cloudSyncStatus = "متزامن سحابياً 🟢",
                     isCloudSyncing = false
                 )
             } catch (e: Exception) {

@@ -66,3 +66,19 @@ data class CustomDayTaskEntity(
     val updatedTimestamp: Long = System.currentTimeMillis()
 )
 
+@Entity(tableName = "question_feedbacks")
+data class QuestionFeedbackEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val questionId: Long,
+    val questionText: String,
+    val subject: String,
+    val selectedOption: String? = null,
+    val feedbackReason: String, // e.g. "خطأ في نص السؤال", "خطأ في الإجابة الصحيحة", "شرح غير واضح", "ملاحظة عامة"
+    val noteText: String,
+    val status: String = "PENDING", // PENDING (قيد المراجعة), REVIEWED (تم الفحص), FIXED (تم التصحيح والاعتماد), REJECTED (مرفوض)
+    val adminReply: String = "",
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+

@@ -10,9 +10,10 @@ import androidx.room.RoomDatabase
         StudyProgressEntity::class,
         FocusSessionEntity::class,
         QuestionEntity::class,
-        CustomDayTaskEntity::class
+        CustomDayTaskEntity::class,
+        QuestionFeedbackEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

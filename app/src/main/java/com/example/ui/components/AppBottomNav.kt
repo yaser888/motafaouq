@@ -5,11 +5,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.LockClock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.LockClock
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Quiz
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.Icon
@@ -43,7 +45,8 @@ fun AppBottomNav(
             Triple(AppTab.PLAN, Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
             Triple(AppTab.QUESTIONS, Icons.Filled.Quiz, Icons.Outlined.Quiz),
             Triple(AppTab.ELEVATION, Icons.Filled.TrendingUp, Icons.Outlined.TrendingUp),
-            Triple(AppTab.FOCUS, Icons.Filled.LockClock, Icons.Outlined.LockClock)
+            Triple(AppTab.FOCUS, Icons.Filled.LockClock, Icons.Outlined.LockClock),
+            Triple(AppTab.ACCOUNT, Icons.Filled.Person, Icons.Outlined.Person)
         )
 
         items.forEach { (tab, filledIcon, outlinedIcon) ->
