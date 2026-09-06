@@ -1,0 +1,6 @@
+{
+  "name": "متفوق",
+  "description": "تطبيق متفوق لمتابعة خطة البكالوريا مع بنك أسئلة واختبارات تفاعلية وشروحات نموذجية للطلاب، مع لوحة تحكم ويب سحابية منفصلة تماماً لإدارة المحتوى واستخراج نماذج الامتحانات من PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
