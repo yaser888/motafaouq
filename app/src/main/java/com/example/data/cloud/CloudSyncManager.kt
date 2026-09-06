@@ -10,33 +10,33 @@ import kotlinx.coroutines.withContext
 
 /**
  * Unified Cloud Synchronization Manager:
- * Seamlessly connects the Android app with Vercel Serverless API and/or Firebase Firestore.
+ * Seamlessly connects the Android app with Supabase Database API and/or Firebase Firestore.
  */
 object CloudSyncManager {
     private const val TAG = "CloudSyncManager"
 
     fun init(context: Context) {
-        VercelCloudSync.init(context)
+        SupabaseCloudSync.init(context)
     }
 
-    fun getVercelUrl(): String = VercelCloudSync.baseUrl
+    fun getSupabaseUrl(): String = SupabaseCloudSync.baseUrl
 
-    fun setVercelUrl(context: Context, url: String) {
-        VercelCloudSync.setCustomVercelUrl(context, url)
+    fun setSupabaseConfig(context: Context, url: String, key: String = "") {
+        SupabaseCloudSync.setCustomSupabaseConfig(context, url, key)
     }
 
     /**
      * Upload student's question feedback to the cloud.
-     * Tries Vercel first, then Firebase Firestore as fallback.
+     * Tries Supabase first, then Firebase Firestore as fallback.
      */
     suspend fun submitFeedback(feedback: QuestionFeedbackEntity): Boolean = withContext(Dispatchers.IO) {
-        var vercelSuccess = false
+        var supabaseSuccess = false
         var firebaseSuccess = false
 
         try {
-            vercelSuccess = VercelCloudSync.uploadFeedback(feedback)
+            supabaseSuccess = SupabaseCloudSync.uploadFeedback(feedback)
         } catch (e: Exception) {
-            Log.w(TAG, "Vercel upload error: ${e.message}")
+            Log.w(TAG, "Supabase upload error: ${e.message}")
         }
 
         try {
@@ -47,8 +47,8 @@ object CloudSyncManager {
             Log.w(TAG, "Firebase upload error: ${e.message}")
         }
 
-        Log.d(TAG, "Feedback submitted to cloud: vercel=$vercelSuccess, firebase=$firebaseSuccess")
-        vercelSuccess || firebaseSuccess
+        Log.d(TAG, "Feedback submitted to cloud: supabase=$supabaseSuccess, firebase=$firebaseSuccess")
+        supabaseSuccess || firebaseSuccess
     }
 
     /**
@@ -57,17 +57,17 @@ object CloudSyncManager {
     suspend fun syncQuestions(repository: StudyRepository): Int = withContext(Dispatchers.IO) {
         var newQuestionsCount = 0
 
-        // 1. Try Vercel Cloud API
+        // 1. Try Supabase Cloud API
         try {
-            val vercelQuestions = VercelCloudSync.fetchQuestions()
-            if (vercelQuestions.isNotEmpty()) {
-                repository.addQuestions(vercelQuestions)
-                newQuestionsCount += vercelQuestions.size
-                Log.d(TAG, "Synced ${vercelQuestions.size} questions from Vercel")
+            val supabaseQuestions = SupabaseCloudSync.fetchQuestions()
+            if (supabaseQuestions.isNotEmpty()) {
+                repository.addQuestions(supabaseQuestions)
+                newQuestionsCount += supabaseQuestions.size
+                Log.d(TAG, "Synced ${supabaseQuestions.size} questions from Supabase")
                 return@withContext newQuestionsCount
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Vercel question sync error: ${e.message}")
+            Log.w(TAG, "Supabase question sync error: ${e.message}")
         }
 
         // 2. Try Firebase Firestore
@@ -91,12 +91,12 @@ object CloudSyncManager {
      * Fetch announcements from the cloud.
      */
     suspend fun fetchAnnouncements(): List<CloudAnnouncement> = withContext(Dispatchers.IO) {
-        // Try Vercel first
+        // Try Supabase first
         try {
-            val vAnn = VercelCloudSync.fetchAnnouncements()
-            if (vAnn.isNotEmpty()) return@withContext vAnn
+            val sAnn = SupabaseCloudSync.fetchAnnouncements()
+            if (sAnn.isNotEmpty()) return@withContext sAnn
         } catch (e: Exception) {
-            Log.w(TAG, "Vercel announcement error: ${e.message}")
+            Log.w(TAG, "Supabase announcement error: ${e.message}")
         }
 
         // Try Firebase

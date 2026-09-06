@@ -5,6 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -78,207 +86,251 @@ class MainActivity : ComponentActivity() {
                 var authRoute by remember { mutableStateOf("landing") }
 
                 if (!isLoggedIn) {
-                    when (authRoute) {
-                        "landing" -> LandingPageScreen(
-                            onNavigateToLogin = { authRoute = "login" },
-                            onNavigateToSignUp = { authRoute = "signup" }
-                        )
-                        "login" -> LoginScreen(
-                            initialIsSignUp = false,
-                            onLoginSuccess = { _ -> isLoggedIn = true },
-                            onBackToLanding = { authRoute = "landing" }
-                        )
-                        "signup" -> LoginScreen(
-                            initialIsSignUp = true,
-                            onLoginSuccess = { _ -> isLoggedIn = true },
-                            onBackToLanding = { authRoute = "landing" }
-                        )
+                    AnimatedContent(
+                        targetState = authRoute,
+                        transitionSpec = {
+                            (slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth / 4 },
+                                animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(320))) togetherWith
+                            (slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth / 4 },
+                                animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(320)))
+                        },
+                        label = "auth_screen_transition"
+                    ) { targetAuthRoute ->
+                        when (targetAuthRoute) {
+                            "landing" -> LandingPageScreen(
+                                onNavigateToLogin = { authRoute = "login" },
+                                onNavigateToSignUp = { authRoute = "signup" }
+                            )
+                            "login" -> LoginScreen(
+                                initialIsSignUp = false,
+                                onLoginSuccess = { _ -> isLoggedIn = true },
+                                onBackToLanding = { authRoute = "landing" }
+                            )
+                            "signup" -> LoginScreen(
+                                initialIsSignUp = true,
+                                onLoginSuccess = { _ -> isLoggedIn = true },
+                                onBackToLanding = { authRoute = "landing" }
+                            )
+                        }
                     }
                 } else {
                     // Grayscale Filter Box Wrapper for complete black-and-white visual discipline
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .drawWithContent {
-                            if (uiState.isGrayscaleEnabled) {
-                                val matrix = ColorMatrix().apply { setToSaturation(0f) }
-                                val filter = ColorFilter.colorMatrix(matrix)
-                                drawIntoCanvas { canvas ->
-                                    val paint = Paint().apply {
-                                        colorFilter = filter
-                                    }
-                                    canvas.saveLayer(size.toRect(), paint)
-                                    drawContent()
-                                    canvas.restore()
-                                }
-                            } else {
-                                drawContent()
-                            }
-                        }
-                ) {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        topBar = {
-                            if (!(uiState.isFocusLockActive && uiState.isFocusTimerRunning)) {
-                                AppTopBar(
-                                    streakDays = stats.streakDays,
-                                    isGrayscale = uiState.isGrayscaleEnabled,
-                                    stream = planConfig.stream,
-                                    onStreamClick = { viewModel.openPlanSetupDialog() },
-                                    onToggleGrayscale = { viewModel.toggleGrayscale() },
-                                    onAdminClick = { viewModel.setAdminPanelOpen(true) },
-                                    onQuickFocusClick = { viewModel.setTab(AppTab.FOCUS) }
-                                )
-                            }
-                        },
-                        bottomBar = {
-                            if (!(uiState.isFocusLockActive && uiState.isFocusTimerRunning)) {
-                                AppBottomNav(
-                                    currentTab = uiState.currentTab,
-                                    onTabSelected = { viewModel.setTab(it) }
-                                )
-                            }
-                        }
-                    ) { innerPadding ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                        ) {
-                            when (uiState.currentTab) {
-                                AppTab.DASHBOARD -> {
-                                    DashboardScreen(
-                                        stats = stats,
-                                        elevationList = elevationList,
-                                        progressList = allProgress,
-                                        planConfig = planConfig,
-                                        onChangePlanClick = { viewModel.openPlanSetupDialog() },
-                                        onNavigateToTab = { viewModel.setTab(it) },
-                                        onSelectMonth = { viewModel.setSelectedMonth(it) },
-                                        onStartFocus = { viewModel.setTab(AppTab.FOCUS) },
-                                        onTogglePeriod1 = { id, curr -> viewModel.togglePeriod1(id, curr) },
-                                        onTogglePeriod2 = { id, curr -> viewModel.togglePeriod2(id, curr) },
-                                        onTogglePeriod3 = { id, curr -> viewModel.togglePeriod3(id, curr) },
-                                        onToggleCards = { id, curr -> viewModel.toggleCards(id, curr) },
-                                        onToggleRecitation = { id, curr -> viewModel.toggleRecitation(id, curr) },
-                                        onToggleAllDay = { id, done -> viewModel.toggleAllDay(id, done) }
-                                    )
-                                }
-
-                                AppTab.PLAN -> {
-                                    StudyPlanScreen(
-                                        allTasks = mergedDayTasks,
-                                        customDayTasks = customDayTasks,
-                                        selectedMonth = uiState.selectedMonth,
-                                        selectedWeek = uiState.selectedWeek,
-                                        selectedSubjectFilter = uiState.selectedSubjectFilter,
-                                        searchQuery = uiState.searchQuery,
-                                        progressList = allProgress,
-                                        planConfig = planConfig,
-                                        onChangePlanClick = { viewModel.openPlanSetupDialog() },
-                                        onSelectMonth = { viewModel.setSelectedMonth(it) },
-                                        onSelectWeek = { viewModel.setSelectedWeek(it) },
-                                        onSetSubjectFilter = { viewModel.setSubjectFilter(it) },
-                                        onSetSearchQuery = { viewModel.setSearchQuery(it) },
-                                        onTogglePeriod1 = { id, curr -> viewModel.togglePeriod1(id, curr) },
-                                        onTogglePeriod2 = { id, curr -> viewModel.togglePeriod2(id, curr) },
-                                        onTogglePeriod3 = { id, curr -> viewModel.togglePeriod3(id, curr) },
-                                        onToggleCards = { id, curr -> viewModel.toggleCards(id, curr) },
-                                        onToggleRecitation = { id, curr -> viewModel.toggleRecitation(id, curr) },
-                                        onToggleAllDay = { id, done -> viewModel.toggleAllDay(id, done) },
-                                        onSaveNote = { id, note -> viewModel.saveDayNote(id, note) },
-                                        onOpenEditTask = { task -> viewModel.openEditDayTask(task) },
-                                        onResetAllCustomTasks = { viewModel.resetAllCustomTasks() }
-                                    )
-                                }
-
-                                AppTab.QUESTIONS -> {
-                                    QuestionsBankScreen(
-                                        questions = allQuestions,
-                                        selectedSubject = uiState.selectedQuestionSubject,
-                                        selectedTypeFilter = uiState.selectedQuestionTypeFilter,
-                                        selectedDifficultyFilter = uiState.selectedDifficultyFilter,
-                                        searchQuery = uiState.questionsSearchQuery,
-                                        onSelectSubject = { viewModel.setQuestionsSubject(it) },
-                                        onSelectTypeFilter = { viewModel.setQuestionTypeFilter(it) },
-                                        onSelectDifficultyFilter = { viewModel.setQuestionDifficultyFilter(it) },
-                                        onSearchQueryChange = { viewModel.setQuestionsSearchQuery(it) },
-                                        onToggleStar = { id, curr -> viewModel.toggleQuestionStar(id, curr) },
-                                        onAnswerQuestion = { q, ans -> viewModel.answerQuestion(q, ans) },
-                                        onOpenFeedback = { q, ans -> viewModel.openFeedbackDialog(q, ans) },
-                                        feedbacks = feedbacks
-                                    )
-                                }
-
-                                AppTab.ELEVATION -> {
-                                    ElevationChartScreen(
-                                        stats = stats,
-                                        elevationList = elevationList,
-                                        subjectProgressList = subjectProgressList
-                                    )
-                                }
-
-                                AppTab.FOCUS -> {
-                                    FocusModeScreen(
-                                        isGrayscaleEnabled = uiState.isGrayscaleEnabled,
-                                        isFocusLockActive = uiState.isFocusLockActive,
-                                        focusRemainingSeconds = uiState.focusRemainingSeconds,
-                                        focusTotalSeconds = uiState.focusTotalSeconds,
-                                        isTimerRunning = uiState.isFocusTimerRunning,
-                                        selectedSound = uiState.selectedFocusSound,
-                                        focusSubject = uiState.focusSubject,
-                                        focusSessions = focusSessions,
-                                        onToggleGrayscale = { viewModel.toggleGrayscale() },
-                                        onSetDuration = { viewModel.setFocusDuration(it) },
-                                        onSetSubject = { viewModel.setFocusSubject(it) },
-                                        onSetSound = { viewModel.setFocusSound(it) },
-                                        onStartFocus = { grayscale, lock ->
-                                             viewModel.startFocusSession(grayscale, lock)
-                                        },
-                                        onPauseFocus = { viewModel.pauseFocusSession() },
-                                        onStopFocus = { viewModel.stopFocusSession(true) },
-                                        onDismissLock = { viewModel.dismissFocusLock() }
-                                    )
-                                }
-
-                                AppTab.MISTAKE_VAULT -> {
-                                    MistakeVaultScreen(
-                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
-                                    )
-                                }
-
-                                AppTab.BAC_SIMULATOR -> {
-                                    BacSimulatorScreen(
-                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
-                                    )
-                                }
-
-                                AppTab.DUEL_BATTLES -> {
-                                    DuelBattleScreen(
-                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
-                                    )
-                                }
-
-                                AppTab.RESCUE_PLANNER -> {
-                                    SmartRescuePlannerScreen(
-                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
-                                    )
-                                }
-
-                                AppTab.AUDIO_FLASHCARDS -> {
-                                    AudioFlashcardsScreen(
-                                        onBack = { viewModel.setTab(AppTab.DASHBOARD) }
-                                    )
-                                }
-
-                                AppTab.ACCOUNT -> {
-                                    AccountScreen(
-                                        onLogout = {
-                                            recreate()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .drawWithContent {
+                                if (uiState.isGrayscaleEnabled) {
+                                    val matrix = ColorMatrix().apply { setToSaturation(0f) }
+                                    val filter = ColorFilter.colorMatrix(matrix)
+                                    drawIntoCanvas { canvas ->
+                                        val paint = Paint().apply {
+                                            colorFilter = filter
                                         }
+                                        canvas.saveLayer(size.toRect(), paint)
+                                        drawContent()
+                                        canvas.restore()
+                                    }
+                                } else {
+                                    drawContent()
+                                }
+                            }
+                    ) {
+                        Scaffold(
+                            modifier = Modifier.fillMaxSize(),
+                            topBar = {
+                                if (!(uiState.isFocusLockActive && uiState.isFocusTimerRunning)) {
+                                    AppTopBar(
+                                        streakDays = stats.streakDays,
+                                        isGrayscale = uiState.isGrayscaleEnabled,
+                                        stream = planConfig.stream,
+                                        onStreamClick = { viewModel.openPlanSetupDialog() },
+                                        onToggleGrayscale = { viewModel.toggleGrayscale() },
+                                        onAdminClick = { viewModel.setAdminPanelOpen(true) },
+                                        onQuickFocusClick = { viewModel.setTab(AppTab.FOCUS) }
+                                    )
+                                }
+                            },
+                            bottomBar = {
+                                if (!(uiState.isFocusLockActive && uiState.isFocusTimerRunning)) {
+                                    AppBottomNav(
+                                        currentTab = uiState.currentTab,
+                                        onTabSelected = { viewModel.setTab(it) }
                                     )
                                 }
                             }
+                        ) { innerPadding ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            ) {
+                                AnimatedContent(
+                                    targetState = uiState.currentTab,
+                                    transitionSpec = {
+                                        if (targetState.ordinal > initialState.ordinal) {
+                                            (slideInHorizontally(
+                                                initialOffsetX = { fullWidth -> fullWidth / 4 },
+                                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                            ) + fadeIn(animationSpec = tween(300))) togetherWith
+                                            (slideOutHorizontally(
+                                                targetOffsetX = { fullWidth -> -fullWidth / 4 },
+                                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                            ) + fadeOut(animationSpec = tween(300)))
+                                        } else {
+                                            (slideInHorizontally(
+                                                initialOffsetX = { fullWidth -> -fullWidth / 4 },
+                                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                            ) + fadeIn(animationSpec = tween(300))) togetherWith
+                                            (slideOutHorizontally(
+                                                targetOffsetX = { fullWidth -> fullWidth / 4 },
+                                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                            ) + fadeOut(animationSpec = tween(300)))
+                                        }
+                                    },
+                                    label = "tab_screen_transition"
+                                ) { targetTab ->
+                                    when (targetTab) {
+                                        AppTab.DASHBOARD -> {
+                                            DashboardScreen(
+                                                stats = stats,
+                                                elevationList = elevationList,
+                                                progressList = allProgress,
+                                                planConfig = planConfig,
+                                                onChangePlanClick = { viewModel.openPlanSetupDialog() },
+                                                onNavigateToTab = { viewModel.setTab(it) },
+                                                onSelectMonth = { viewModel.setSelectedMonth(it) },
+                                                onStartFocus = { viewModel.setTab(AppTab.FOCUS) },
+                                                onTogglePeriod1 = { id, curr -> viewModel.togglePeriod1(id, curr) },
+                                                onTogglePeriod2 = { id, curr -> viewModel.togglePeriod2(id, curr) },
+                                                onTogglePeriod3 = { id, curr -> viewModel.togglePeriod3(id, curr) },
+                                                onToggleCards = { id, curr -> viewModel.toggleCards(id, curr) },
+                                                onToggleRecitation = { id, curr -> viewModel.toggleRecitation(id, curr) },
+                                                onToggleAllDay = { id, done -> viewModel.toggleAllDay(id, done) }
+                                            )
+                                        }
+
+                                        AppTab.PLAN -> {
+                                            StudyPlanScreen(
+                                                allTasks = mergedDayTasks,
+                                                customDayTasks = customDayTasks,
+                                                selectedMonth = uiState.selectedMonth,
+                                                selectedWeek = uiState.selectedWeek,
+                                                selectedSubjectFilter = uiState.selectedSubjectFilter,
+                                                searchQuery = uiState.searchQuery,
+                                                progressList = allProgress,
+                                                planConfig = planConfig,
+                                                onChangePlanClick = { viewModel.openPlanSetupDialog() },
+                                                onSelectMonth = { viewModel.setSelectedMonth(it) },
+                                                onSelectWeek = { viewModel.setSelectedWeek(it) },
+                                                onSetSubjectFilter = { viewModel.setSubjectFilter(it) },
+                                                onSetSearchQuery = { viewModel.setSearchQuery(it) },
+                                                onTogglePeriod1 = { id, curr -> viewModel.togglePeriod1(id, curr) },
+                                                onTogglePeriod2 = { id, curr -> viewModel.togglePeriod2(id, curr) },
+                                                onTogglePeriod3 = { id, curr -> viewModel.togglePeriod3(id, curr) },
+                                                onToggleCards = { id, curr -> viewModel.toggleCards(id, curr) },
+                                                onToggleRecitation = { id, curr -> viewModel.toggleRecitation(id, curr) },
+                                                onToggleAllDay = { id, done -> viewModel.toggleAllDay(id, done) },
+                                                onSaveNote = { id, note -> viewModel.saveDayNote(id, note) },
+                                                onOpenEditTask = { task -> viewModel.openEditDayTask(task) },
+                                                onResetAllCustomTasks = { viewModel.resetAllCustomTasks() }
+                                            )
+                                        }
+
+                                        AppTab.QUESTIONS -> {
+                                            QuestionsBankScreen(
+                                                questions = allQuestions,
+                                                selectedSubject = uiState.selectedQuestionSubject,
+                                                selectedTypeFilter = uiState.selectedQuestionTypeFilter,
+                                                selectedDifficultyFilter = uiState.selectedDifficultyFilter,
+                                                searchQuery = uiState.questionsSearchQuery,
+                                                onSelectSubject = { viewModel.setQuestionsSubject(it) },
+                                                onSelectTypeFilter = { viewModel.setQuestionTypeFilter(it) },
+                                                onSelectDifficultyFilter = { viewModel.setQuestionDifficultyFilter(it) },
+                                                onSearchQueryChange = { viewModel.setQuestionsSearchQuery(it) },
+                                                onToggleStar = { id, curr -> viewModel.toggleQuestionStar(id, curr) },
+                                                onAnswerQuestion = { q, ans -> viewModel.answerQuestion(q, ans) },
+                                                onOpenFeedback = { q, ans -> viewModel.openFeedbackDialog(q, ans) },
+                                                feedbacks = feedbacks
+                                            )
+                                        }
+
+                                        AppTab.ELEVATION -> {
+                                            ElevationChartScreen(
+                                                stats = stats,
+                                                elevationList = elevationList,
+                                                subjectProgressList = subjectProgressList
+                                            )
+                                        }
+
+                                        AppTab.FOCUS -> {
+                                            FocusModeScreen(
+                                                isGrayscaleEnabled = uiState.isGrayscaleEnabled,
+                                                isFocusLockActive = uiState.isFocusLockActive,
+                                                focusRemainingSeconds = uiState.focusRemainingSeconds,
+                                                focusTotalSeconds = uiState.focusTotalSeconds,
+                                                isTimerRunning = uiState.isFocusTimerRunning,
+                                                selectedSound = uiState.selectedFocusSound,
+                                                focusSubject = uiState.focusSubject,
+                                                focusSessions = focusSessions,
+                                                onToggleGrayscale = { viewModel.toggleGrayscale() },
+                                                onSetDuration = { viewModel.setFocusDuration(it) },
+                                                onSetSubject = { viewModel.setFocusSubject(it) },
+                                                onSetSound = { viewModel.setFocusSound(it) },
+                                                onStartFocus = { grayscale, lock ->
+                                                    viewModel.startFocusSession(grayscale, lock)
+                                                },
+                                                onPauseFocus = { viewModel.pauseFocusSession() },
+                                                onStopFocus = { viewModel.stopFocusSession(true) },
+                                                onDismissLock = { viewModel.dismissFocusLock() }
+                                            )
+                                        }
+
+                                        AppTab.MISTAKE_VAULT -> {
+                                            MistakeVaultScreen(
+                                                onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                            )
+                                        }
+
+                                        AppTab.BAC_SIMULATOR -> {
+                                            BacSimulatorScreen(
+                                                onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                            )
+                                        }
+
+                                        AppTab.DUEL_BATTLES -> {
+                                            DuelBattleScreen(
+                                                onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                            )
+                                        }
+
+                                        AppTab.RESCUE_PLANNER -> {
+                                            SmartRescuePlannerScreen(
+                                                onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                            )
+                                        }
+
+                                        AppTab.AUDIO_FLASHCARDS -> {
+                                            AudioFlashcardsScreen(
+                                                onBack = { viewModel.setTab(AppTab.DASHBOARD) }
+                                            )
+                                        }
+
+                                        AppTab.ACCOUNT -> {
+                                            AccountScreen(
+                                                onLogout = {
+                                                    recreate()
+                                                },
+                                                onOpenAdminPanel = {
+                                                    viewModel.setAdminPanelOpen(true)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
 
                             // Student Edit Day Task Dialog
                             if (uiState.isEditDayTaskDialogOpen && uiState.editingDayTask != null) {

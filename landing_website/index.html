@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة متفوق التعليمية - التطبيق الأول لطلاب البكالوريا</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -29,8 +30,8 @@
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-blue-600 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <img src="logo.png" alt="شعار منصة متفوق" class="w-full h-full rounded-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=متفوق&background=2563eb&color=fff&size=128&font-size=0.4';">
+                <div class="w-12 h-12 rounded-full bg-blue-600 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/30 overflow-hidden">
+                    <img src="logo.jpg" alt="شعار منصة متفوق" class="w-full h-full rounded-full object-cover">
                 </div>
                 <div>
                     <h1 class="font-black text-xl text-white tracking-wide">منصة متفوق</h1>
@@ -57,6 +58,14 @@
         <div class="absolute inset-0 bg-gradient-to-b from-blue-900/20 via-slate-900 to-slate-950 pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             
+            <!-- Prominent App Logo Badge in Hero -->
+            <div class="flex justify-center mb-6">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full blur-md opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <img src="logo.jpg" alt="شعار منصة متفوق" class="relative w-28 h-28 rounded-full border-4 border-slate-900 object-cover shadow-2xl">
+                </div>
+            </div>
+
             <div class="inline-flex items-center gap-2 bg-blue-950/80 border border-blue-800/50 px-4 py-1.5 rounded-full text-blue-300 text-xs font-bold mb-8">
                 <i class="fa-solid fa-bolt text-yellow-400"></i>
                 <span>التحديث السحابي الشامل v2.4 متوفر الآن</span>
@@ -149,8 +158,9 @@
     </section>
 
     <!-- Download Footer Banner -->
-    <section id="download" class="py-16 bg-gradient-to-r from-blue-900 to-indigo-900">
-        <div class="max-w-5xl mx-auto px-4 text-center">
+    <section id="download" class="py-16 bg-gradient-to-r from-blue-900 to-indigo-900 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 text-center relative z-10">
+            <img src="logo.jpg" alt="شعار المنصة" class="w-20 h-20 rounded-full mx-auto border-2 border-white/20 shadow-xl mb-4 object-cover">
             <h2 class="text-3xl font-extrabold text-white mb-4">جاهز لتحقيق معدل أحلامك في البكالوريا؟</h2>
             <p class="text-blue-200 text-sm max-w-xl mx-auto mb-8">حمل التطبيق الآن مجاناً وابدأ في تنظيم جدولك اليومي وتصحيح أخطائك بكل سهولة.</p>
 
@@ -162,7 +172,11 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 py-8 border-t border-slate-900 text-center text-slate-500 text-xs">
+    <footer class="bg-slate-950 py-8 border-t border-slate-900 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
+        <div class="flex items-center gap-2">
+            <img src="logo.jpg" alt="شعار المنصة" class="w-6 h-6 rounded-full object-cover">
+            <span class="text-slate-400 font-bold">منصة متفوق التعليمية</span>
+        </div>
         <p>جميع الحقوق محفوظة © 2026 لمنصة متفوق التعليمية - منصة الامتياز الأولى</p>
     </footer>
 

@@ -22,7 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun AccountScreen(onLogout: () -> Unit) {
+fun AccountScreen(
+    onLogout: () -> Unit,
+    onOpenAdminPanel: () -> Unit = {}
+) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("student_auth_prefs", Context.MODE_PRIVATE) }
     val studentName = prefs.getString("student_name", "أحمد الطالب") ?: "أحمد الطالب"
@@ -172,6 +175,45 @@ fun AccountScreen(onLogout: () -> Unit) {
             InfoRow(label = "حالة الاتصال", value = "متصل بالسحابة بنجاح 🟢")
             InfoRow(label = "المزامنة التلقائية", value = "مفعلة (تحديثات فورية)")
             InfoRow(label = "إصدار التطبيق", value = "v2.1.0 (أحدث نسخة)")
+        }
+
+        // Section 4: Admin Controls & Management
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Default.AdminPanelSettings, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = "صلاحيات الأدمن والمشرف 🛡️",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Text(
+                    text = "الوصول السريع للوحة تحكم المشرف لإدارة الأسئلة، مراجعة البلاغات، وبث الاختبارات.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Button(
+                    onClick = onOpenAdminPanel,
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(Icons.Default.AdminPanelSettings, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("فتح لوحة التحكم الكاملة للأدمن", fontWeight = FontWeight.Bold)
+                }
+            }
         }
 
         // Logout Button

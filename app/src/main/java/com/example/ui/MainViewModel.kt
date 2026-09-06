@@ -390,7 +390,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             // 1. Save locally in device database (offline-first)
             repository.submitQuestionFeedback(feedbackEntity)
 
-            // 2. Upload to Vercel/Cloud in background
+            // 2. Upload to Supabase/Cloud in background
             CloudSyncManager.submitFeedback(feedbackEntity)
 
             if (selectedOption != null) {
@@ -401,8 +401,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // --- Cloud Sync Controller ---
-    fun setVercelCloudUrl(url: String) {
-        CloudSyncManager.setVercelUrl(getApplication(), url)
+    fun setSupabaseConfig(url: String, key: String = "") {
+        CloudSyncManager.setSupabaseConfig(getApplication(), url, key)
         syncFromCloud()
     }
 
@@ -410,7 +410,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isCloudSyncing = true)
             try {
-                // Sync questions from Vercel / Cloud into local Room DB
+                // Sync questions from Supabase / Cloud into local Room DB
                 val addedCount = CloudSyncManager.syncQuestions(repository)
                 val announcements = CloudSyncManager.fetchAnnouncements()
 

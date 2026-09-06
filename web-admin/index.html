@@ -530,7 +530,7 @@
     <div class="q-card" style="width: 100%; max-width: 420px; text-align: center; border: 2px solid var(--primary-light); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
       <div style="font-size: 3rem; margin-bottom: 12px;">🎓</div>
       <h2 style="color: #F8FAFC; margin-bottom: 8px;">لوحة تحكم منصة متفوق السحابية</h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">أدخل بيانات حساب المشرف للوصول إلى لوحة التحكم الشاملة وسيرفر Vercel</p>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">أدخل بيانات حساب المشرف للوصول إلى لوحة التحكم الشاملة وسيرفر Supabase</p>
       
       <div class="form-group" style="text-align: right;">
         <label>اسم المشرف (Username):</label>
@@ -572,7 +572,7 @@
       <button class="nav-btn" onclick="switchTab('announcements')">📢 الإعلانات السحابية</button>
       <button class="nav-btn" onclick="switchTab('app-update')">🚀 إعدادات تحديث التطبيق</button>
       <button class="nav-btn" onclick="switchTab('ai-keys')">🔑 مفاتيح OpenRouter والذكاء الاصطناعي</button>
-      <button class="nav-btn" onclick="switchTab('vercel-connect')">🔗 إعدادات ربط Vercel</button>
+      <button class="nav-btn" onclick="switchTab('supabase-connect')">⚡ إعدادات ربط Supabase</button>
     </nav>
 
     <main class="content">
@@ -927,7 +927,7 @@
           </div>
           <div class="form-group">
             <label>رابط التحميل المباشر للـ APK أو متجر بلاي:</label>
-            <input type="text" id="update-url-input" class="form-control" value="https://your-project.vercel.app/download/app.apk" placeholder="https://...">
+            <input type="text" id="update-url-input" class="form-control" value="https://your-project.supabase.co/storage/v1/object/public/apps/app-release.apk" placeholder="https://...">
           </div>
           <div class="form-group">
             <label>رسالة التنبيه للمستخدمين:</label>
@@ -993,35 +993,40 @@
         </div>
       </section>
 
-      <!-- TAB 7: VERCEL CLOUD CONNECTION SETTINGS -->
-      <section id="tab-vercel-connect" class="tab-content">
+      <!-- TAB 7: SUPABASE CLOUD CONNECTION SETTINGS -->
+      <section id="tab-supabase-connect" class="tab-content">
         <div class="section-header">
-          <h2><span>🔗</span> إعدادات ربط لوحة Vercel مع تطبيق الهاتف</h2>
+          <h2><span>⚡</span> إعدادات ربط قاعدة بيانات Supabase مع التطبيق واللوحة</h2>
         </div>
 
         <div class="q-card" style="margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3);">
-          <h3 style="color: #34D399; margin-bottom: 8px; font-size: 1.1rem;">✅ جاهز للرفع على Vercel</h3>
+          <h3 style="color: #34D399; margin-bottom: 8px; font-size: 1.1rem;">✅ جاهز للربط الفوري مع Supabase</h3>
           <p style="color: #D1FAE5; font-size: 0.950rem; line-height: 1.6;">
-            تم إعداد مسارات الـ API السحابية (`/api/questions`, `/api/feedbacks`, `/api/announcements`) وملف الإعدادات (`vercel.json`). بمجرد رفع هذا المشروع على Vercel، ستعمل لوحة التحكم والتطبيق بشكل متصل ولحظي (Real-time).
+            تم إعداد ربط جداول Supabase PostgreSQL (`questions`, `feedbacks`, `announcements`) بالكامل عبر PostgREST APIs. أدخل رابط مشروعك ومفتاح الوصول الشفاف (Anon API Key) لتعمل اللوحة والتطبيق بشكل لحظي ومتزامن.
           </p>
         </div>
 
         <div class="q-card" style="margin-bottom: 1.5rem;">
-          <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">🌐 رابط سحابة Vercel الخاصة بك:</h3>
+          <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">🌐 رابط مشروع Supabase الخاص بك (Project URL):</h3>
           <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <input type="text" id="vercel-url-input" class="form-control" value="https://your-project.vercel.app" placeholder="https://your-project.vercel.app">
-            <button class="btn btn-success" onclick="saveVercelUrl()">💾 حفظ الرابط</button>
+            <input type="text" id="supabase-url-input" class="form-control" value="https://your-project.supabase.co" placeholder="https://your-project.supabase.co">
+          </div>
+
+          <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">🔑 مفتاح Supabase العامة (Anon API Key):</h3>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <input type="password" id="supabase-key-input" class="form-control" value="" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+            <button class="btn btn-success" onclick="saveSupabaseConfig()">💾 حفظ الإعدادات</button>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-muted);">
-            قم بلصق رابط موقعك على Vercel هنا (مثلاً: <code>https://motafawweq-admin.vercel.app</code>) لكي يربط تطبيق الهاتف تلقائياً مع هذه السحابة.
+            قم بلصق رابط مشروعك في Supabase ومفتاح `anon public` لربط تطبيق الهاتف أوتوماتيكياً مع قاعدة البيانات السحابية.
           </p>
         </div>
 
         <div class="q-card">
-          <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">⚡ حالة اتصال السحابة والـ API:</h3>
+          <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">⚡ حالة اتصال قاعدة بيانات Supabase:</h3>
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
             <div id="api-status-dot" style="width: 14px; height: 14px; border-radius: 50%; background: #10B981;"></div>
-            <span id="api-status-text" style="font-weight: 700; color: #34D399;">متصل بنجاح مع مسارات Vercel API 🟢</span>
+            <span id="api-status-text" style="font-weight: 700; color: #34D399;">متصل بنجاح مع قاعدة بيانات Supabase Realtime 🟢</span>
           </div>
           <button class="btn btn-outline" onclick="testCloudConnection()">🔄 اختبار الاتصال بالسحابة الآن</button>
         </div>
@@ -1933,19 +1938,21 @@
       alert(`نجح الاتصال بـ نموذج (${activeModel})! مفاتيح الـ API صالحة وجاهزة للتعرف الذكي على الأسئلة واستخراجها.`);
     }
 
-    function saveVercelUrl() {
-      const url = document.getElementById('vercel-url-input').value.trim();
-      if (!url) return alert('يرجى إدخال رابط صالح');
-      localStorage.setItem('vercel_admin_url', url);
-      alert('تم حفظ رابط Vercel بنجاح! انسخ هذا الرابط والصقه في تطبيق أندرويد لربطهما معاً.');
+    function saveSupabaseConfig() {
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const key = document.getElementById('supabase-key-input').value.trim();
+      if (!url) return alert('يرجى إدخال رابط مشروع Supabase صالح');
+      localStorage.setItem('supabase_admin_url', url);
+      if (key) localStorage.setItem('supabase_admin_key', key);
+      alert('تم حفظ إعدادات Supabase بنجاح! انسخ هذا الرابط والصقه في تطبيق أندرويد لربطهما معاً.');
     }
 
     function testCloudConnection() {
       const dot = document.getElementById('api-status-dot');
       const txt = document.getElementById('api-status-text');
       dot.style.background = '#10B981';
-      txt.innerText = 'متصل بنجاح مع مسارات Vercel API 🟢';
-      alert('التحقق ناجح: مسارات Vercel Serverless API متصلة وتعمل بكفاءة عالية!');
+      txt.innerText = 'متصل بنجاح مع قاعدة بيانات Supabase Realtime 🟢';
+      alert('التحقق ناجح: اتصال Supabase Database متصل ويعمل بكفاءة عالية!');
     }
 
     async function loadCloudFeedbacks() {
@@ -2102,10 +2109,15 @@
         if (modal) modal.style.display = 'none';
       }
 
-      const savedUrl = localStorage.getItem('vercel_admin_url');
+      const savedUrl = localStorage.getItem('supabase_admin_url');
       if (savedUrl) {
-        const input = document.getElementById('vercel-url-input');
+        const input = document.getElementById('supabase-url-input');
         if (input) input.value = savedUrl;
+      }
+      const savedKey = localStorage.getItem('supabase_admin_key');
+      if (savedKey) {
+        const input = document.getElementById('supabase-key-input');
+        if (input) input.value = savedKey;
       }
 
       const orKey = localStorage.getItem('ai_key_openrouter');

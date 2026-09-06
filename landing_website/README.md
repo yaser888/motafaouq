@@ -1,32 +1,31 @@
-# 🚀 دليل رفع موقع الهبوط والتطبيق على Vercel
+# 🚀 دليل رفع موقع الهبوط واستضافة التطبيق على Supabase
 
-تم تصميم موقع الهبوط الخاص بـ **منصة متفوق التعليمية** بأحدث التقنيات السريعة (HTML5, Tailwind CSS, FontAwesome) ليكون جاهزاً للنشر الفوري على **Vercel** أو **GitHub Pages**.
+تم تصميم موقع الهبوط الخاص بـ **منصة متفوق التعليمية** بأحدث التقنيات السريعة (HTML5, Tailwind CSS, FontAwesome) ليكون جاهزاً للنشر الفوري والاستضافة على **Supabase Storage** أو **GitHub Pages**.
 
 ---
 
 ## 📁 محتويات مجلد `landing_website/`
 1. `index.html`: صفحة الهبوط الرئيسية باللغة العربية مع روابط التحميل المباشرة واستعراض مميزات المنصة.
-2. `logo.png`: شعار المنصة الرسمي المشتق من صور التطبيق.
-3. `app-release.apk`: ملف أندرويد النهائي الجاهز للتحميل للطلاب (يتم وضعه في مجلد `public` عند الرفع على Vercel).
+2. `logo.jpg`: شعار المنصة الرسمي المشتق من صور التطبيق.
+3. `app-release.apk`: ملف أندرويد النهائي الجاهز للتحميل للطلاب (يتم وضعه في مجلد `apps` داخل Supabase Storage).
 
 ---
 
-## ⚡ خطوات الرفع والتشغيل على Vercel (في 3 دقائق)
+## ⚡ خطوات الرفع والتشغيل على Supabase
 
-### الخطوة 1: تجهيز المستودع على GitHub
-1. قم بإنشاء مستودع جديد على حسابك في **GitHub** وسمّه مثلاً `mutafawweq-landing`.
-2. انسخ جميع ملفات مجلد `landing_website` داخل هذا المستودع.
-3. انسخ ملف الـ APK الخارجي الخاص بك وضعْه باسم `app-release.apk` في المجلد الرئيسي.
+### الخطوة 1: إنشاء Bucket في Supabase Storage
+1. افتح مشروعك على موقع [Supabase.com](https://supabase.com).
+2. انتقل إلى قسم **Storage** وأنطق حزمة جديدة باسم `apps` وجعلها Public.
+3. قم برفع ملف `app-release.apk` إلى هذا المجلد لكي يحصل الطلاب على رابط تحميل مباشر.
 
-### الخطوة 2: الربط المباشر مع Vercel
-1. افتح موقع [Vercel.com](https://vercel.com) وسجّل الدخول بحساب GitHub الخاص بك.
-2. اضغط على **Add New Project** ثم اختر مستودع `mutafawweq-landing`.
-3. اضغط على **Deploy**.
+### الخطوة 2: ربط قاعدة البيانات
+1. قم بتشغيل الأوامر الموجودة في ملف `supabase_schema.sql` في محرر الـ SQL الخاص بـ Supabase.
 
 ---
 
 ## 🔗 النتيجة
-- ستحصل فوراً على رابط رسمي ومحمي بشهادة SSL مثل:  
-  `https://mutafawweq-app.vercel.app`
+- ستحصل فوراً على رابط تحفيزي ومحمي بشهادة SSL مثل:  
+  `https://your-project.supabase.co`
 - سيمتلك الطلاب رابط تحميل مباشر للتطبيق عبر:  
-  `https://mutafawweq-app.vercel.app/app-release.apk`
+  `https://your-project.supabase.co/storage/v1/object/public/apps/app-release.apk`
+

@@ -15,16 +15,20 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /**
- * Vercel Cloud Sync Client:
- * Connects the Android app directly with the Vercel-hosted Admin Panel and Serverless API.
+ * Supabase Cloud Sync Client:
+ * Connects the Android app directly with the Supabase Realtime Database & Storage REST API.
  */
-object VercelCloudSync {
-    private const val TAG = "VercelCloudSync"
-    private const val PREFS_NAME = "vercel_cloud_config"
-    private const val KEY_BASE_URL = "vercel_base_url"
+object SupabaseCloudSync {
+    private const val TAG = "SupabaseCloudSync"
+    private const val PREFS_NAME = "supabase_cloud_config"
+    private const val KEY_BASE_URL = "supabase_base_url"
+    private const val KEY_ANON_KEY = "supabase_anon_key"
 
-    // Default Vercel deployment URL (fallback or placeholder)
-    var baseUrl: String = "https://your-admin.vercel.app"
+    // Default Supabase project URL & Key placeholders
+    var baseUrl: String = "https://your-project.supabase.co"
+        private set
+
+    var apiKey: String = "your-supabase-anon-key"
         private set
 
     private val client = OkHttpClient.Builder()
@@ -38,66 +42,80 @@ object VercelCloudSync {
     fun init(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         baseUrl = prefs.getString(KEY_BASE_URL, baseUrl) ?: baseUrl
+        apiKey = prefs.getString(KEY_ANON_KEY, apiKey) ?: apiKey
     }
 
-    fun setCustomVercelUrl(context: Context, newUrl: String) {
+    fun setCustomSupabaseConfig(context: Context, newUrl: String, newKey: String = apiKey) {
         var cleanUrl = newUrl.trim()
         if (cleanUrl.endsWith("/")) {
             cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1)
         }
         baseUrl = cleanUrl
+        apiKey = newKey.trim()
+
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_BASE_URL, cleanUrl)
+            .putString(KEY_ANON_KEY, apiKey)
             .apply()
-        Log.d(TAG, "Vercel base URL updated to: $baseUrl")
+        Log.d(TAG, "Supabase config updated: url=$baseUrl")
     }
 
     /**
-     * Upload student's question feedback / note directly to Vercel Cloud API
+     * Upload student's question feedback directly to Supabase table
      */
     suspend fun uploadFeedback(feedback: QuestionFeedbackEntity): Boolean = withContext(Dispatchers.IO) {
         try {
             val json = JSONObject().apply {
                 put("id", "fb_${feedback.id}_${System.currentTimeMillis()}")
-                put("questionId", feedback.questionId)
-                put("questionText", feedback.questionText)
+                put("question_id", feedback.questionId)
+                put("question_text", feedback.questionText)
                 put("subject", feedback.subject)
-                put("selectedOption", feedback.selectedOption)
-                put("feedbackReason", feedback.feedbackReason)
-                put("noteText", feedback.noteText)
+                put("selected_option", feedback.selectedOption)
+                put("feedback_reason", feedback.feedbackReason)
+                put("note_text", feedback.noteText)
                 put("timestamp", feedback.timestamp)
             }
 
             val requestBody = json.toString().toRequestBody(JSON_MEDIA_TYPE)
             val request = Request.Builder()
-                .url("$baseUrl/api/feedbacks")
+                .url("$baseUrl/rest/v1/feedbacks")
+                .header("apikey", apiKey)
+                .header("Authorization", "Bearer $apiKey")
+                .header("Content-Type", "application/json")
+                .header("Prefer", "return=minimal")
                 .post(requestBody)
                 .build()
 
             val response = client.newCall(request).execute()
-            val isSuccess = response.isSuccessful
-            Log.d(TAG, "Feedback upload result: code=${response.code}, success=$isSuccess")
+            val isSuccess = response.isSuccessful || response.code == 201
+            Log.d(TAG, "Supabase Feedback upload result: code=${response.code}, success=$isSuccess")
             response.close()
             isSuccess
         } catch (e: Exception) {
-            Log.w(TAG, "Could not upload feedback to Vercel ($baseUrl): ${e.message}")
+            Log.w(TAG, "Could not upload feedback to Supabase ($baseUrl): ${e.message}")
             false
         }
     }
 
     /**
-     * Fetch the latest questions from Vercel Cloud API
+     * Fetch the latest questions from Supabase database table
      */
     suspend fun fetchQuestions(subject: String? = null): List<QuestionEntity> = withContext(Dispatchers.IO) {
         try {
             val url = if (subject != null && subject.isNotEmpty()) {
-                "$baseUrl/api/questions?subject=$subject"
+                "$baseUrl/rest/v1/questions?subject=eq.$subject&select=*"
             } else {
-                "$baseUrl/api/questions"
+                "$baseUrl/rest/v1/questions?select=*"
             }
 
-            val request = Request.Builder().url(url).get().build()
+            val request = Request.Builder()
+                .url(url)
+                .header("apikey", apiKey)
+                .header("Authorization", "Bearer $apiKey")
+                .get()
+                .build()
+
             val response = client.newCall(request).execute()
             val bodyString = response.body?.string() ?: ""
             response.close()
@@ -106,27 +124,30 @@ object VercelCloudSync {
                 return@withContext emptyList()
             }
 
-            val json = JSONObject(bodyString)
-            val dataArray = json.optJSONArray("data") ?: JSONArray()
-            val list = mutableListOf<QuestionEntity>()
+            val dataArray = if (bodyString.trim().startsWith("[")) {
+                JSONArray(bodyString)
+            } else {
+                JSONObject(bodyString).optJSONArray("data") ?: JSONArray()
+            }
 
+            val list = mutableListOf<QuestionEntity>()
             for (i in 0 until dataArray.length()) {
                 val item = dataArray.getJSONObject(i)
                 list.add(
                     QuestionEntity(
                         id = 0L,
                         subject = item.optString("subject", "MATH"),
-                        unitOrTopic = item.optString("unitOrTopic", "الوحدة العامة"),
-                        questionText = item.optString("questionText", ""),
-                        questionType = item.optString("questionType", "MCQ"),
-                        optionA = item.optString("optionA", ""),
-                        optionB = item.optString("optionB", ""),
-                        optionC = item.optString("optionC", ""),
-                        optionD = item.optString("optionD", ""),
-                        correctAnswer = item.optString("correctAnswer", "A"),
+                        unitOrTopic = item.optString("unit_or_topic", item.optString("unitOrTopic", "الوحدة العامة")),
+                        questionText = item.optString("question_text", item.optString("questionText", "")),
+                        questionType = item.optString("question_type", item.optString("questionType", "MCQ")),
+                        optionA = item.optString("option_a", item.optString("optionA", "")),
+                        optionB = item.optString("option_b", item.optString("optionB", "")),
+                        optionC = item.optString("option_c", item.optString("optionC", "")),
+                        optionD = item.optString("option_d", item.optString("optionD", "")),
+                        correctAnswer = item.optString("correct_answer", item.optString("correctAnswer", "A")),
                         explanation = item.optString("explanation", ""),
                         difficulty = item.optString("difficulty", "متوسط"),
-                        yearOrSource = item.optString("yearOrSource", "سحابي من لوحة Vercel"),
+                        yearOrSource = item.optString("year_or_source", item.optString("yearOrSource", "سحابي من قاعدة Supabase")),
                         isStarred = false,
                         createdTimestamp = System.currentTimeMillis()
                     )
@@ -134,17 +155,23 @@ object VercelCloudSync {
             }
             list
         } catch (e: Exception) {
-            Log.w(TAG, "Error fetching questions from Vercel: ${e.message}")
+            Log.w(TAG, "Error fetching questions from Supabase: ${e.message}")
             emptyList()
         }
     }
 
     /**
-     * Fetch announcements published on Vercel Admin Panel
+     * Fetch announcements from Supabase
      */
     suspend fun fetchAnnouncements(): List<CloudAnnouncement> = withContext(Dispatchers.IO) {
         try {
-            val request = Request.Builder().url("$baseUrl/api/announcements").get().build()
+            val request = Request.Builder()
+                .url("$baseUrl/rest/v1/announcements?select=*")
+                .header("apikey", apiKey)
+                .header("Authorization", "Bearer $apiKey")
+                .get()
+                .build()
+
             val response = client.newCall(request).execute()
             val bodyString = response.body?.string() ?: ""
             response.close()
@@ -153,10 +180,13 @@ object VercelCloudSync {
                 return@withContext emptyList()
             }
 
-            val json = JSONObject(bodyString)
-            val dataArray = json.optJSONArray("data") ?: JSONArray()
-            val list = mutableListOf<CloudAnnouncement>()
+            val dataArray = if (bodyString.trim().startsWith("[")) {
+                JSONArray(bodyString)
+            } else {
+                JSONObject(bodyString).optJSONArray("data") ?: JSONArray()
+            }
 
+            val list = mutableListOf<CloudAnnouncement>()
             for (i in 0 until dataArray.length()) {
                 val item = dataArray.getJSONObject(i)
                 list.add(
@@ -166,13 +196,13 @@ object VercelCloudSync {
                         message = item.optString("message", ""),
                         date = item.optString("date", "الآن"),
                         timestamp = item.optLong("timestamp", System.currentTimeMillis()),
-                        isImportant = item.optBoolean("isImportant", false)
+                        isImportant = item.optBoolean("is_important", item.optBoolean("isImportant", false))
                     )
                 )
             }
             list
         } catch (e: Exception) {
-            Log.w(TAG, "Error fetching announcements from Vercel: ${e.message}")
+            Log.w(TAG, "Error fetching announcements from Supabase: ${e.message}")
             emptyList()
         }
     }
