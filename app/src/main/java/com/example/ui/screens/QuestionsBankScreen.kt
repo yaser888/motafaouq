@@ -145,7 +145,7 @@ fun QuestionsBankScreen(
                             )
                         }
                         Text(
-                            text = "اختبر نفسك مع نماذج وزارية، حلول مفصلة وشروحات نموذجية",
+                            text = "اختبر نفسك مع نماذج شاملة، حلول مفصلة وشروحات نموذجية",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -299,7 +299,7 @@ fun QuestionsBankScreen(
                                 "ALL" to "الكل",
                                 "سهل" to "🟢 سهل",
                                 "متوسط" to "🟡 متوسط",
-                                "وزاري / متقدم" to "🔴 وزاري متقدم"
+                                "متقدم" to "🔴 متقدم"
                             ).forEach { (diffKey, label) ->
                                 val isSelected = selectedDifficultyFilter == diffKey
                                 FilterChip(
@@ -439,7 +439,7 @@ fun QuestionItemCard(
                     // Difficulty Badge
                     val diffColor = when (question.difficulty) {
                         "سهل" -> EmeraldSuccess
-                        "وزاري / متقدم" -> MaterialTheme.colorScheme.error
+                        "متقدم" -> MaterialTheme.colorScheme.error
                         else -> AmberGold500
                     }
                     Surface(

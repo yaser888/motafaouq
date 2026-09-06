@@ -1,5 +1,8 @@
 package com.example.data.models
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class BacExamTopic(
     val topicNumber: Int, // 1 or 2
     val title: String,
@@ -7,6 +10,7 @@ data class BacExamTopic(
     val exercises: List<BacExercise>
 )
 
+@Immutable
 data class BacExercise(
     val exerciseNumber: Int,
     val title: String,
@@ -17,16 +21,18 @@ data class BacExercise(
     val markingScheme: List<MarkingItem>
 )
 
+@Immutable
 data class MarkingItem(
     val criteria: String,
     val points: Float
 )
 
+@Immutable
 data class BacSubjectExam(
     val id: String,
     val subject: Subject,
     val title: String,
-    val stream: String = "شعبة علوم تجريبية / رياضيات",
+    val stream: String = "علوم تجريبية / رياضيات",
     val durationMinutes: Int, // e.g. 210 for 3h 30m
     val readingPhaseMinutes: Int = 30, // 30 min reading and choosing
     val topic1: BacExamTopic,
@@ -39,7 +45,7 @@ object BacSimulatorData {
             id = "bac_math_2024",
             subject = Subject.MATH,
             title = "امتحان شهادة البكالوريا التجريبي - مادة الرياضيات",
-            stream = "شعبة علوم تجريبية",
+            stream = "علوم تجريبية",
             durationMinutes = 210, // 3 hours 30 mins
             readingPhaseMinutes = 30,
             topic1 = BacExamTopic(
@@ -102,7 +108,7 @@ object BacSimulatorData {
             id = "bac_physics_2024",
             subject = Subject.PHYSICS,
             title = "امتحان شهادة البكالوريا التجريبي - العلوم الفيزيائية",
-            stream = "شعبة علوم تجريبية / رياضيات",
+            stream = "علوم تجريبية / رياضيات",
             durationMinutes = 210, // 3 hours 30 mins
             readingPhaseMinutes = 30,
             topic1 = BacExamTopic(
@@ -151,7 +157,7 @@ object BacSimulatorData {
             id = "bac_philosophy_2024",
             subject = Subject.PHILOSOPHY,
             title = "امتحان شهادة البكالوريا التجريبي - مادة الفلسفة",
-            stream = "شعبة علوم تجريبية / رياضيات / لغات",
+            stream = "علوم تجريبية / رياضيات / لغات",
             durationMinutes = 240, // 4 hours
             readingPhaseMinutes = 30,
             topic1 = BacExamTopic(

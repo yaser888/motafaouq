@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة متفوق التعليمية - التطبيق الأول لطلاب البكالوريا</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(59, 130, 246, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-blue-600 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <img src="logo.png" alt="شعار منصة متفوق" class="w-full h-full rounded-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=متفوق&background=2563eb&color=fff&size=128&font-size=0.4';">
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-white tracking-wide">منصة متفوق</h1>
+                    <p class="text-xs text-blue-400 font-medium">التعليم الذكي للجميع</p>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+                <a href="#features" class="hover:text-blue-400 transition">المميزات</a>
+                <a href="#simulator" class="hover:text-blue-400 transition">محاكي البكالوريا</a>
+                <a href="#stats" class="hover:text-blue-400 transition">إحصائيات المنصة</a>
+                <a href="#download" class="hover:text-blue-400 transition">تحميل APK</a>
+            </nav>
+
+            <a href="app-release.apk" download class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-download"></i>
+                <span>تحميل التطبيق مجاناً</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-900/20 via-slate-900 to-slate-950 pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            
+            <div class="inline-flex items-center gap-2 bg-blue-950/80 border border-blue-800/50 px-4 py-1.5 rounded-full text-blue-300 text-xs font-bold mb-8">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
+                <span>التحديث السحابي الشامل v2.4 متوفر الآن</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl font-black text-white leading-tight mb-6">
+                طريقك الأضمن نحو <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400">التفوق والدرجات النهائية</span> 🚀
+            </h1>
+
+            <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed mb-10">
+                استمتع ببنك أسئلة سحابي متكامل، ومساعد ذكاء اصطناعي (AI) يصحح أخطاءك فورياً، وخطط دراسية إنقاذية مصممة لتحقيق أهدافك في البكالوريا.
+            </p>
+
+            <!-- Main CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-16">
+                <a href="app-release.apk" download class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold px-8 py-4 rounded-2xl text-base shadow-xl shadow-emerald-900/30 transition transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-android text-2xl"></i>
+                    <div class="text-right">
+                        <div class="text-xs font-normal opacity-90">تنزيل مباشر لحوامل أندرويد</div>
+                        <div class="text-base font-bold">تحميل ملف APK (18.4 MB)</div>
+                    </div>
+                </a>
+
+                <a href="#features" class="w-full sm:w-auto glass-card hover:bg-slate-800 text-slate-200 font-bold px-8 py-4 rounded-2xl text-base transition flex items-center justify-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-circle-info text-blue-400"></i>
+                    <span>استكشف المميزات</span>
+                </a>
+            </div>
+
+            <!-- Platform Highlights Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8 border-t border-slate-800/80">
+                <div class="p-4 rounded-2xl glass-card">
+                    <div class="text-3xl font-black text-blue-400 mb-1">+50,000</div>
+                    <div class="text-xs text-slate-400">طالب نشط بالمنصة</div>
+                </div>
+                <div class="p-4 rounded-2xl glass-card">
+                    <div class="text-3xl font-black text-emerald-400 mb-1">98.4%</div>
+                    <div class="text-xs text-slate-400">نسبة نجاح واقتناع الطلاب</div>
+                </div>
+                <div class="p-4 rounded-2xl glass-card">
+                    <div class="text-3xl font-black text-amber-400 mb-1">+12,000</div>
+                    <div class="text-xs text-slate-400">سؤال نموذج مع الحل الرسمِي</div>
+                </div>
+                <div class="p-4 rounded-2xl glass-card">
+                    <div class="text-3xl font-black text-purple-400 mb-1">24/7</div>
+                    <div class="text-xs text-slate-400">مساعد الذكاء الاصطناعي</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-slate-950/60 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl font-black text-white mb-4">لماذا يختار الطلاب منصة متفوق؟</h2>
+                <p class="text-slate-400 text-sm">كل الأوات التي تحتاجها للسيطرة على موادك وتحقيق معدل ممتاز بخيارات مجانية وسريعة.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-blue-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">الخطة الدراسية الإنقاذية الذكية</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">جدول زمني تلقائي يتكيف مع شعبتك الدراسية ويقسم أهدافك اليومية بذكاء لتغطية جميع المواد بمرونة فائقة.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-emerald-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">خزنة الأخطاء والذكاء الاصطناعي</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">التقط صورة لتمارينك أو ارفع ملف PDF ليقوم الذكاء الاصطناعي بتصحيح خطوتك وتوضيح التعليل الدقيق.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-purple-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-swords"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">مبارزة التحدي المباشر</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">تنافس ضد طلاب البكالوريا من كافة ولايات الوطن في جولات سريعة وممتعة لترسيخ المفاهيم والمعارف.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Footer Banner -->
+    <section id="download" class="py-16 bg-gradient-to-r from-blue-900 to-indigo-900">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-extrabold text-white mb-4">جاهز لتحقيق معدل أحلامك في البكالوريا؟</h2>
+            <p class="text-blue-200 text-sm max-w-xl mx-auto mb-8">حمل التطبيق الآن مجاناً وابدأ في تنظيم جدولك اليومي وتصحيح أخطائك بكل سهولة.</p>
+
+            <a href="app-release.apk" download class="inline-flex items-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black px-10 py-5 rounded-2xl text-lg shadow-2xl shadow-emerald-950/50 transition transform hover:scale-105">
+                <i class="fa-solid fa-download text-xl"></i>
+                <span>تنزيل التطبيق للاندرويد (APK)</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-8 border-t border-slate-900 text-center text-slate-500 text-xs">
+        <p>جميع الحقوق محفوظة © 2026 لمنصة متفوق التعليمية - منصة الامتياز الأولى</p>
+    </footer>
+
+</body>
+</html>

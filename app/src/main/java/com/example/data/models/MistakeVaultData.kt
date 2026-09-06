@@ -1,7 +1,9 @@
 package com.example.data.models
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+@Immutable
 data class MistakeItem(
     val id: String,
     val subject: Subject,

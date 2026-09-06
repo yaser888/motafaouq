@@ -138,7 +138,7 @@ fun AccountScreen(onLogout: () -> Unit) {
         AccountSectionCard(title = "معلومات الطالب الشخصية", icon = Icons.Default.Person) {
             InfoRow(label = "الاسم الكامل", value = studentName)
             InfoRow(label = "البريد الإلكتروني", value = studentEmail)
-            InfoRow(label = "الشعبة الدراسية", value = "علوم تجريبية / رياضيات")
+            InfoRow(label = "المسار الدراسي", value = "علوم تجريبية / رياضيات")
             InfoRow(label = "حالة الحساب", value = "نشط وموثق سحابياً 🟢")
         }
 

@@ -24,6 +24,11 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.AppTab
 import com.example.ui.MainViewModel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import com.example.ui.components.AdminPanelDialog
 import com.example.ui.components.AppBottomNav
 import com.example.ui.components.AppTopBar
 import com.example.ui.components.EditDayTaskDialog
@@ -121,6 +126,7 @@ class MainActivity : ComponentActivity() {
                                     stream = planConfig.stream,
                                     onStreamClick = { viewModel.openPlanSetupDialog() },
                                     onToggleGrayscale = { viewModel.toggleGrayscale() },
+                                    onAdminClick = { viewModel.setAdminPanelOpen(true) },
                                     onQuickFocusClick = { viewModel.setTab(AppTab.FOCUS) }
                                 )
                             }
@@ -290,7 +296,45 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // Intensive Study Plan Configuration Dialog
-                            if (uiState.isPlanSetupDialogOpen) {
+                            
+                        if (uiState.isAdminPanelOpen) {
+                            val allQuestions by viewModel.allQuestions.collectAsStateWithLifecycle(initialValue = emptyList())
+                            val allFeedbacks by viewModel.allQuestionFeedbacks.collectAsStateWithLifecycle(initialValue = emptyList())
+                            
+                            AdminPanelDialog(
+                                feedbacks = allFeedbacks,
+                                questions = allQuestions,
+                                planConfig = com.example.data.models.PlanConfig(),
+                                onDismiss = { viewModel.setAdminPanelOpen(false) },
+                                onUpdateFeedbackStatus = { id, status, reply -> viewModel.updateFeedbackStatus(id, status, reply) },
+                                onDeleteFeedback = { id -> viewModel.deleteFeedback(id) },
+                                onEditQuestion = { q -> viewModel.updateQuestion(q) },
+                                onOpenPlanSetup = { viewModel.setAdminPanelOpen(false); viewModel.openPlanSetupDialog() }
+                            )
+                        }
+
+                        if (uiState.activeChallengeTest != null) {
+                            AlertDialog(
+                                onDismissRequest = { viewModel.dismissChallengeTest() },
+                                title = { Text(uiState.activeChallengeTest!!.title) },
+                                text = { Text(uiState.activeChallengeTest!!.description) },
+                                confirmButton = {
+                                    Button(onClick = { 
+                                        viewModel.dismissChallengeTest()
+                                        viewModel.setTab(com.example.ui.AppTab.MISTAKE_VAULT)
+                                    }) {
+                                        Text("قبول التحدي! 💪")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { viewModel.dismissChallengeTest() }) {
+                                        Text("تجاهل حالياً")
+                                    }
+                                }
+                            )
+                        }
+
+                        if (uiState.isPlanSetupDialogOpen) {
                                 PlanSetupDialog(
                                     initialConfig = planConfig,
                                     canDismiss = planConfig.isConfigured,

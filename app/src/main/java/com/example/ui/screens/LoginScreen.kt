@@ -1,6 +1,11 @@
 package com.example.ui.screens
 
 import android.content.Context
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,10 +81,13 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Logo & Title
-                    Text(
-                        text = "🎓",
-                        fontSize = 48.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_mutafawweq_1788679709620),
+                        contentDescription = "شعار التطبيق",
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
+                            .size(56.dp)
+                            .clip(CircleShape)
                     )
                     Text(
                         text = "منصة متفوق التعليمية",

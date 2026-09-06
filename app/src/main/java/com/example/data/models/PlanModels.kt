@@ -1,5 +1,9 @@
 package com.example.data.models
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+
+@Immutable
 enum class Subject(val arabicName: String, val colorHex: Long) {
     MATH("الرياضيات", 0xFF2563EB),
     PHYSICS("الفيزياء", 0xFF7C3AED),
@@ -20,6 +24,7 @@ enum class Subject(val arabicName: String, val colorHex: Long) {
     val color: androidx.compose.ui.graphics.Color get() = androidx.compose.ui.graphics.Color(colorHex)
 }
 
+@Immutable
 enum class EducationalStream(
     val id: String,
     val title: String,
@@ -64,6 +69,7 @@ enum class EducationalStream(
     }
 }
 
+@Immutable
 data class PlanConfig(
     val stream: EducationalStream = EducationalStream.BAC_SCIENTIFIC,
     val startDateMillis: Long = System.currentTimeMillis(),
@@ -78,12 +84,14 @@ data class PlanConfig(
         }
 }
 
+@Immutable
 enum class PeriodType(val arabicName: String, val timeRange: String, val iconName: String) {
     PERIOD_1("الفترة الأولى (الصباحية - المادة الثقيلة)", "2.5 إلى 3.5 ساعات فور الاستيقاظ", "light_mode"),
     PERIOD_2("الفترة الثانية (الظهر/العصر - المادة المتوسطة)", "1.5 إلى 2.5 ساعة", "wb_sunny"),
     PERIOD_3("الفترة الثالثة (المساء - التثبيت والاختبار)", "1.5 إلى 2 ساعة", "nights_stay")
 }
 
+@Immutable
 data class DayTask(
     val id: String,
     val monthNumber: Int,
@@ -99,6 +107,7 @@ data class DayTask(
     val isRestDay: Boolean = false
 )
 
+@Immutable
 data class MonthInfo(
     val monthNumber: Int,
     val name: String,
@@ -108,6 +117,7 @@ data class MonthInfo(
     val endWeek: Int
 )
 
+@Immutable
 data class ElevationStat(
     val monthNumber: Int,
     val monthName: String,

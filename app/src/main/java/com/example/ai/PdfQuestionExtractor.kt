@@ -36,7 +36,10 @@ object PdfQuestionExtractor {
     suspend fun extractFromUri(
         context: Context,
         uri: Uri,
-        selectedSubject: Subject?
+        selectedSubject: Subject?,
+        provider: String = "Gemini",
+        apiKey: String = "",
+        modelId: String = ""
     ): List<QuestionEntity> = withContext(Dispatchers.IO) {
         val extractedTextBuilder = StringBuilder()
         val renderedBitmaps = mutableListOf<Bitmap>()
@@ -77,7 +80,7 @@ object PdfQuestionExtractor {
 
         if (renderedBitmaps.isNotEmpty()) {
             // Multimodal extraction with Gemini
-            val geminiResult = extractQuestionsWithGeminiMultimodal(renderedBitmaps, selectedSubject)
+            val geminiResult = extractQuestionsWithGeminiMultimodal(renderedBitmaps, selectedSubject, provider, apiKey, modelId)
             if (geminiResult.isNotEmpty()) {
                 return@withContext geminiResult
             }
@@ -100,13 +103,16 @@ object PdfQuestionExtractor {
      */
     suspend fun extractFromText(
         text: String,
-        selectedSubject: Subject?
+        selectedSubject: Subject?,
+        provider: String = "Gemini",
+        apiKey: String = "",
+        modelId: String = ""
     ): List<QuestionEntity> = withContext(Dispatchers.IO) {
         if (text.isBlank()) return@withContext emptyList()
 
         // 1. Try Gemini 3.5 Flash
         try {
-            val geminiQuestions = extractQuestionsWithGeminiText(text, selectedSubject)
+            val geminiQuestions = extractQuestionsWithGeminiText(text, selectedSubject, provider, apiKey, modelId)
             if (geminiQuestions.isNotEmpty()) {
                 return@withContext geminiQuestions
             }
@@ -120,10 +126,13 @@ object PdfQuestionExtractor {
 
     private suspend fun extractQuestionsWithGeminiText(
         text: String,
-        selectedSubject: Subject?
+        selectedSubject: Subject?,
+        provider: String,
+        customApiKey: String,
+        modelId: String
     ): List<QuestionEntity> {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isBlank() || apiKey == "MY_GEMINI_API_KEY") {
+        val apiKey = if (provider == "OpenRouter") customApiKey else BuildConfig.GEMINI_API_KEY
+        if (apiKey.isBlank() || (apiKey == "MY_GEMINI_API_KEY" && provider != "OpenRouter")) {
             return emptyList()
         }
 
@@ -135,7 +144,7 @@ object PdfQuestionExtractor {
             1. حدد نوع السؤال: 'MCQ' إذا كان متعدد الخيارات أو صح/خطأ، أو 'ESSAY' إذا كان سؤالاً مقالياً أو مسألة.
             2. لكل سؤال MCQ: استخرج نص السؤال، و4 خيارات (optionA, optionB, optionC, optionD)، وحدد الخيار الصحيح (A أو B أو C أو D)، وشرح الحل النموذجي.
             3. حدد المادة: MATH, PHYSICS, CHEMISTRY, SCIENCE, ARABIC, ENGLISH, FRENCH, ISLAMIC, GENERAL
-            4. حدد مستوى الصعوبة: 'سهل' أو 'متوسط' أو 'وزاري / متقدم'.
+            4. حدد مستوى الصعوبة: 'سهل' أو 'متوسط' أو 'متقدم'.
             5. حدد مصدر السؤال أو السنة مثل 'بكالوريا 2024' أو 'امتحان تجريبي'.
 
             أرجع النتيجة بصيغة JSON Array نقية ومباشرة بدون نصوص أخرى:
@@ -201,10 +210,13 @@ object PdfQuestionExtractor {
 
     private suspend fun extractQuestionsWithGeminiMultimodal(
         bitmaps: List<Bitmap>,
-        selectedSubject: Subject?
+        selectedSubject: Subject?,
+        provider: String,
+        customApiKey: String,
+        modelId: String
     ): List<QuestionEntity> {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isBlank() || apiKey == "MY_GEMINI_API_KEY") {
+        val apiKey = if (provider == "OpenRouter") customApiKey else BuildConfig.GEMINI_API_KEY
+        if (apiKey.isBlank() || (apiKey == "MY_GEMINI_API_KEY" && provider != "OpenRouter")) {
             return emptyList()
         }
 
@@ -349,7 +361,7 @@ object PdfQuestionExtractor {
                         optionC = optC,
                         optionD = optD,
                         correctAnswer = currentCorrectAnswer,
-                        explanation = if (currentExplanation.isNotBlank()) currentExplanation else "تم التحقق من الإجابة النموذجية المعتمدة في الامتحان الوزاري.",
+                        explanation = if (currentExplanation.isNotBlank()) currentExplanation else "تم التحقق من الإجابة النموذجية المعتمدة في الامتحان الرسمي.",
                         difficulty = currentDifficulty,
                         yearOrSource = currentYear,
                         isStarred = false,
@@ -428,7 +440,7 @@ object PdfQuestionExtractor {
                             optionC = "الخيار (ج) قيمة تقريبية",
                             optionD = "الخيار (د) إجابة غير دقيقة",
                             correctAnswer = "A",
-                            explanation = "تطبيق مباشر لقوانين وقواعد المادة وفق المنهاج الوزاري.",
+                            explanation = "تطبيق مباشر لقوانين وقواعد المادة وفق المنهاج المعتمد.",
                             difficulty = "متوسط",
                             yearOrSource = "امتحان PDF مستخرج",
                             isStarred = false,
@@ -462,7 +474,7 @@ object PdfQuestionExtractor {
     fun getSampleExamText(subject: Subject): String {
         return when (subject) {
             Subject.MATH -> """
-                امتحان البكالوريا التجريبي - مادة الرياضيات (شعبة علوم تجريبية ورياضيات)
+                امتحان البكالوريا التجريبي - مادة الرياضيات (علوم تجريبية ورياضيات)
                 
                 س1: لتكن الدالة f المعرفة على R بـ f(x) = (2x - 1)e^x. إن مشتقة الدالة f'(x) تساوي:
                 (أ) f'(x) = (2x + 1)e^x

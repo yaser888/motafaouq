@@ -1,6 +1,8 @@
 package com.example.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +50,7 @@ fun AppTopBar(
     onStreamClick: () -> Unit = {},
     onToggleGrayscale: () -> Unit,
     onQuickFocusClick: () -> Unit,
+    onAdminClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -69,20 +72,13 @@ fun AppTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.testTag("app_brand_header")
             ) {
-                Box(
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_mutafawweq_1788679709620),
+                    contentDescription = "متفوق",
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(RoyalBlue600),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = "متفوق",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                        .size(38.dp)
+                        .clip(CircleShape)
+                )
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(
@@ -148,6 +144,26 @@ fun AppTopBar(
                     }
                 }
 
+                // Admin Panel Button
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .clickable { onAdminClick() }
+                        .testTag("admin_panel_btn")
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.AdminPanelSettings,
+                            contentDescription = "لوحة المشرف",
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
                 // Grayscale Mode Toggle
                 Surface(
                     shape = CircleShape,

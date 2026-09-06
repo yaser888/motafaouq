@@ -486,7 +486,7 @@ fun MistakeVaultCard(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "✅ الإجابة الوزارية الصحيحة:", style = MaterialTheme.typography.labelSmall, color = EmeraldSuccess500)
+                        Text(text = "✅ الإجابة الصحيحة:", style = MaterialTheme.typography.labelSmall, color = EmeraldSuccess500)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(text = item.correctAnswer, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = EmeraldSuccess500)
                     }
@@ -775,7 +775,7 @@ fun MistakeFlashReviewSession(
                             border = BorderStroke(1.dp, EmeraldSuccess500.copy(alpha = 0.4f))
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text(text = "✅ الإجابة الوزارية الصحيحة:", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = EmeraldSuccess500)
+                                Text(text = "✅ الإجابة الصحيحة:", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = EmeraldSuccess500)
                                 Text(text = currentItem.correctAnswer, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
                             }
                         }

@@ -1,5 +1,8 @@
 package com.example.data.models
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class DuelQuestion(
     val id: String,
     val subject: Subject,
@@ -12,6 +15,7 @@ data class DuelQuestion(
     val explanation: String
 )
 
+@Immutable
 data class PeerRival(
     val name: String,
     val wilaya: String,
@@ -21,6 +25,7 @@ data class PeerRival(
     val speedLevelSeconds: Float // 3.0s to 8.0s
 )
 
+@Immutable
 data class LeaderboardUser(
     val rank: Int,
     val name: String,

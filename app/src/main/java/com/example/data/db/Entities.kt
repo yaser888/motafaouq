@@ -41,7 +41,7 @@ data class QuestionEntity(
     val optionD: String = "",
     val correctAnswer: String = "A", // A, B, C, D or model answer text
     val explanation: String = "",
-    val difficulty: String = "متوسط", // سهل، متوسط، وزاري / متقدم
+    val difficulty: String = "متوسط", // سهل، متوسط، متقدم
     val yearOrSource: String = "بنك الأسئلة",
     val isStarred: Boolean = false,
     val userSelectedAnswer: String? = null,

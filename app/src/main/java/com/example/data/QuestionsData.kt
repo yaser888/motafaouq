@@ -32,7 +32,7 @@ object QuestionsData {
             correctAnswer = "A",
             explanation = "مشتق جداء تابعين: f'(x) = u'v + uv'. مشتق e^(2x) هو 2e^(2x)، ومشتق cos(x) هو -sin(x). بالتعويض: f'(x) = 2e^(2x)cos(x) - e^(2x)sin(x) = e^(2x)(2cos(x) - sin(x)).",
             difficulty = "متوسط",
-            yearOrSource = "وزاري نموذجي"
+            yearOrSource = "نموذجي"
         ),
         QuestionEntity(
             subject = Subject.MATH.name,
@@ -103,8 +103,8 @@ object QuestionsData {
             optionD = "",
             correctAnswer = "تتحقق عندما يكون النبض ω = 1/√(LC) وتكون الممانعة Z صغرية Z = R وتكون شدة التيار عظمى I = U/R وتكون الدارة بأكملها ذات سلوك أومي صرف.",
             explanation = "في حالة التجاوب، تتعادل ردية الوشيعة Lω مع اتساعية المكثفة 1/(Cω)، فيكون فرق الصفحة φ = 0 وعامل الاستطاعة cos(φ) = 1، وتصرف الدارة استطاعة متوسطة أعظمية.",
-            difficulty = "وزاري / متقدم",
-            yearOrSource = "دورة 2024 الوزارية"
+            difficulty = "متقدم",
+            yearOrSource = "دورة 2024 الرسمية"
         ),
 
         // --- الكيمياء (CHEMISTRY) ---
@@ -148,7 +148,7 @@ object QuestionsData {
             correctAnswer = "إستر + ماء (تفاعل الأسترة العكوس: R-COOH + R'-OH ⇌ R-COO-R' + H2O)",
             explanation = "تفاعل الأسترة تفاعل عكوس ولا ينتهي، ويستخدم حمض الكبريت المركز كحفاز ومجفف لسحب الماء وإزاحة التوازن نحو تشكل الإستر العطري.",
             difficulty = "متوسط",
-            yearOrSource = "تسميع وزاري"
+            yearOrSource = "تسميع شامل"
         ),
 
         // --- العلوم الطبيعية (SCIENCE) ---

@@ -1,5 +1,8 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -29,6 +32,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,6 +50,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +66,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import com.example.ui.MainViewModel
+import com.example.ui.VerifiedQuestion
 import com.example.data.db.QuestionEntity
 import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.models.EducationalStream
@@ -84,7 +94,7 @@ fun AdminPanelDialog(
     onOpenPlanSetup: () -> Unit
 ) {
     var currentTab by remember { mutableIntStateOf(0) }
-    val tabTitles = listOf("ملاحظات الأسئلة (${feedbacks.size})", "التحكم بالخطة المكثفة", "لوحة الويب السحابية")
+    val tabTitles = listOf("ملاحظات الأسئلة (${feedbacks.size})", "التحكم بالخطة المكثفة", "لوحة الويب السحابية", "استخراج وتحقق PDF", "اختبار التحدي")
 
     var editingQuestionTarget by remember { mutableStateOf<QuestionEntity?>(null) }
     var filterFeedbackStatus by remember { mutableStateOf("ALL") }
@@ -125,20 +135,13 @@ fun AdminPanelDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(38.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.AdminPanelSettings,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                }
-                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_launcher_mutafawweq_1788679709620),
+                                contentDescription = "شعار التطبيق",
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                            )
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
@@ -273,6 +276,10 @@ fun AdminPanelDialog(
                                 questionsCount = questions.size,
                                 feedbacksCount = feedbacks.size
                             )
+                        }
+                        3 -> {
+                            // Smart Verification Tab
+                            PdfVerificationTab()
                         }
                     }
                 }
@@ -779,6 +786,126 @@ fun AdminEditQuestionDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PdfVerificationTab(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
+    var selectedProvider by remember { mutableStateOf("Gemini") }
+    var apiKey by remember { mutableStateOf("") }
+    var modelId by remember { mutableStateOf("google/gemini-2.5-flash") }
+    
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            viewModel.processAndVerifyPdf(context, uri, null, selectedProvider, apiKey, modelId)
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text("التحقق الذكي ومنع التكرار", style = MaterialTheme.typography.titleLarge)
+        Text("اختر مزود الذكاء الاصطناعي لاستخراج الأسئلة من الـ PDF:", style = MaterialTheme.typography.bodyMedium)
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = selectedProvider == "Gemini",
+                onClick = { selectedProvider = "Gemini" },
+                label = { Text("جيمناي (مدمج)") }
+            )
+            FilterChip(
+                selected = selectedProvider == "OpenRouter",
+                onClick = { selectedProvider = "OpenRouter" },
+                label = { Text("أوبن راوتر (OpenRouter)") }
+            )
+        }
+        
+        if (selectedProvider == "OpenRouter") {
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = { apiKey = it },
+                label = { Text("مفتاح API الخاص بـ OpenRouter") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = modelId,
+                onValueChange = { modelId = it },
+                label = { Text("معرف النموذج (مثال: google/gemini-2.5-flash)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+        }
+        
+        Button(onClick = { launcher.launch("application/pdf") }, modifier = Modifier.fillMaxWidth()) {
+            Text("اختيار ملف PDF والبدء")
+        }
+
+        if (uiState.isExtractingPdf) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text("جاري الاستخراج والتحقق...", modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else if (uiState.verifiedPdfQuestions.isNotEmpty()) {
+            Text("نتائج التحقق (${uiState.verifiedPdfQuestions.size} سؤال):", style = MaterialTheme.typography.titleMedium)
+            
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(uiState.verifiedPdfQuestions) { vq ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (vq.isDuplicate) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                Text(vq.question.subject, fontWeight = FontWeight.Bold)
+                                if (vq.isDuplicate) {
+                                    Text("مكرر ⚠️", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                                } else {
+                                    Text("جديد ✅", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Text(vq.question.questionText, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { viewModel.clearVerifiedQuestions() }, modifier = Modifier.weight(1f)) {
+                    Text("إلغاء")
+                }
+                Button(
+                    onClick = {
+                        val newQuestions = uiState.verifiedPdfQuestions.filter { !it.isDuplicate }.map { it.question }
+                        viewModel.publishVerifiedQuestions(newQuestions)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("نشر الأسئلة الجديدة")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ChallengeControlTab(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text("إرسال اختبار تحدي للطلاب 🚀", style = MaterialTheme.typography.titleLarge)
+        Text("قم بإنشاء اختبار سريع مبني على أكثر 10 أسئلة سجلت فيها أخطاء عالية، وأرسله كإشعار فوري لجميع الطلاب لاختبار تركيزهم واستدراك الأخطاء الشائعة.", style = MaterialTheme.typography.bodyMedium)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Button(
+            onClick = { viewModel.sendChallengeTest() },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Icon(Icons.Default.Send, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("إرسال إشعار التحدي الآن", style = MaterialTheme.typography.titleMedium)
         }
     }
 }

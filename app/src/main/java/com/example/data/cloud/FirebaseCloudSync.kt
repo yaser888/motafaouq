@@ -134,7 +134,7 @@ object FirebaseCloudSync {
                         correctAnswer = data["correctAnswer"] as? String ?: "A",
                         explanation = data["explanation"] as? String ?: "",
                         difficulty = data["difficulty"] as? String ?: "متوسط",
-                        yearOrSource = data["yearOrSource"] as? String ?: "بنك السحابة الوزاري",
+                        yearOrSource = data["yearOrSource"] as? String ?: "بنك السحابة الرسمي",
                         isStarred = false,
                         createdTimestamp = (data["timestamp"] as? Long) ?: System.currentTimeMillis()
                     )

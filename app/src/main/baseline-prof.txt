@@ -1,0 +1,20 @@
+# Baseline Profile for Mutafawweq App (Optimized UI rendering and Compose stability)
+Lcom/example/MainActivity;
+Lcom/example/ui/screens/LandingPageScreenKt;
+Lcom/example/ui/screens/LoginScreenKt;
+Lcom/example/ui/screens/BacSimulatorScreenKt;
+Lcom/example/ui/screens/MainAppScreenKt;
+Lcom/example/ui/components/AppTopBarKt;
+Lcom/example/ui/components/AdminPanelDialogKt;
+Lcom/example/data/models/PlanConfig;
+Lcom/example/data/models/DayTask;
+Lcom/example/data/models/BacSubjectExam;
+Lcom/example/data/models/MistakeItem;
+Landroidx/compose/runtime/Composer;
+Landroidx/compose/runtime/RecomposeScopeImpl;
+Landroidx/compose/runtime/Immutable;
+Landroidx/compose/runtime/Stable;
+Landroidx/compose/material3/TextKt;
+Landroidx/compose/material3/ButtonKt;
+Landroidx/compose/foundation/lazy/LazyColumnKt;
+Landroidx/compose/foundation/lazy/LazyRowKt;

@@ -436,7 +436,7 @@ fun PlanSetupDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "• محطات المراجعة: مراجعة واستدراك نهاية كل أسبوع + محاكاة نماذج وزارية شاملة في الأيام الأخيرة قبل الانتهاء.",
+                            text = "• محطات المراجعة: مراجعة واستدراك نهاية كل أسبوع + محاكاة نماذج شاملة شاملة في الأيام الأخيرة قبل الانتهاء.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

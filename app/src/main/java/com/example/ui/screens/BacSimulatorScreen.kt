@@ -1,5 +1,9 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -195,7 +199,7 @@ fun BacSelectExamView(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold)
                     )
                     Text(
-                        text = "اختبارات رسمية مطابقة للتوقيت والظروف الوزارية",
+                        text = "اختبارات رسمية مطابقة للتوقيت والظروف الرسمية",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -249,7 +253,7 @@ fun BacSelectExamView(
                             Icon(imageVector = Icons.Default.LockClock, contentDescription = null, tint = RoyalBlue600, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "المحاكي يتضمن: 30 دقيقة اختيار الموضوع + مؤقت رسمي + سلم التنقيط الوزاري بالكسور الجزئية.",
+                                text = "المحاكي يتضمن: 30 دقيقة اختيار الموضوع + مؤقت رسمي + سلم التنقيط الرسمي بالكسور الجزئية.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = RoyalBlue600
                             )
@@ -316,7 +320,7 @@ fun BacSelectExamView(
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "الشعبة: ${exam.stream}",
+                        text = "المسار: ${exam.stream}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -431,7 +435,7 @@ fun BacReadingChoiceView(
                     Text(text = "💡", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "نصيحة وزارية: خذ 15 دقيقة لقراءة الموضوعين جيداً، واختر الموضوع الذي تضمن فيه أعلى علامة في التمرين الأكبر.",
+                        text = "نصيحة هامة: خذ 15 دقيقة لقراءة الموضوعين جيداً، واختر الموضوع الذي تضمن فيه أعلى علامة في التمرين الأكبر.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -710,7 +714,7 @@ fun BacLiveExamView(
                 Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "تسليم ورقة الإجابة والاطلاع على سلم التنقيط الوزاري 📝",
+                    text = "تسليم ورقة الإجابة والاطلاع على سلم التنقيط الرسمي 📝",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -747,15 +751,21 @@ fun BacScoringView(
                     modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "🎓", fontSize = 48.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_mutafawweq_1788679709620),
+                        contentDescription = "شعار التطبيق",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "سلم التنقيط الوزاري والحل النموذجي",
+                        text = "سلم التنقيط الرسمي والحل النموذجي",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "قارن إجابتك خطوة بخطوة مع معايير التصحيح الوزارية وسجل علامتك التقديرية",
+                        text = "قارن إجابتك خطوة بخطوة مع معايير التصحيح المعتمدة وسجل علامتك التقديرية",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -823,7 +833,7 @@ fun BacScoringView(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "معايير سلم التنقيط الوزاري الجزئي:",
+                        text = "معايير سلم التنقيط الرسمي الجزئي:",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
 

@@ -17,12 +17,19 @@ import com.example.data.db.FocusSessionEntity
 import com.example.data.db.QuestionEntity
 import com.example.data.db.QuestionFeedbackEntity
 import com.example.data.db.StudyProgressEntity
+import com.example.data.models.ChallengeTest
+import com.example.data.models.MistakeItem
+import com.example.data.models.MistakeVaultData
 import com.example.data.models.DayTask
 import com.example.data.models.ElevationStat
 import com.example.data.models.MonthInfo
 import com.example.data.models.PlanConfig
 import com.example.data.models.Subject
 import com.example.focus.FocusAudioPlayer
+import android.content.Context
+import android.net.Uri
+import com.example.ai.PdfQuestionExtractor
+import kotlinx.coroutines.flow.update
 import com.example.focus.FocusSoundType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -65,7 +72,7 @@ data class UiState(
     // Questions Bank State
     val selectedQuestionSubject: Subject? = null,
     val selectedQuestionTypeFilter: String = "ALL", // ALL, MCQ, ESSAY, STARRED
-    val selectedDifficultyFilter: String = "ALL", // ALL, سهل, متوسط, وزاري / متقدم
+    val selectedDifficultyFilter: String = "ALL", // ALL, سهل, متوسط, متقدم
     val questionsSearchQuery: String = "",
     val isCloudSyncing: Boolean = false,
     val cloudSyncStatus: String = "متصل بالسحابة 🟢",
@@ -78,7 +85,15 @@ data class UiState(
     val isFeedbackDialogOpen: Boolean = false,
     val feedbackTargetQuestion: QuestionEntity? = null,
     val feedbackSelectedOption: String? = null,
-    val isAdminPanelOpen: Boolean = false
+    val isAdminPanelOpen: Boolean = false,
+    val isExtractingPdf: Boolean = false,
+    val verifiedPdfQuestions: List<VerifiedQuestion> = emptyList(),
+    val activeChallengeTest: ChallengeTest? = null
+)
+
+data class VerifiedQuestion(
+    val question: QuestionEntity,
+    val isDuplicate: Boolean
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -516,6 +531,81 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun resetAllProgress() {
         viewModelScope.launch {
             repository.resetAll()
+        }
+    }
+
+    fun processAndVerifyPdf(context: Context, uri: Uri, subject: Subject?, provider: String = "Gemini", apiKey: String = "", modelId: String = "") {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            _uiState.update { it.copy(isExtractingPdf = true) }
+            try {
+                // 1. Extract from PDF
+                val extracted = PdfQuestionExtractor.extractFromUri(context, uri, subject, provider, apiKey, modelId)
+                
+                // 2. Fetch existing questions to check for duplicates
+                val existingQuestions = allQuestions.value
+                val existingTexts = existingQuestions.map { it.questionText.trim().lowercase() }.toSet()
+                
+                // 3. Mark extracted ones
+                val verifiedQuestions = extracted.map { eq ->
+                    val isDuplicate = existingTexts.contains(eq.questionText.trim().lowercase())
+                    VerifiedQuestion(eq, isDuplicate)
+                }
+                
+                _uiState.update { it.copy(isExtractingPdf = false, verifiedPdfQuestions = verifiedQuestions) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isExtractingPdf = false) }
+            }
+        }
+    }
+    
+    fun publishVerifiedQuestions(questions: List<QuestionEntity>) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            repository.addQuestions(questions)
+            _uiState.update { it.copy(verifiedPdfQuestions = emptyList()) }
+        }
+    }
+    
+    fun clearVerifiedQuestions() {
+        _uiState.update { it.copy(verifiedPdfQuestions = emptyList()) }
+    }
+
+        fun setAdminPanelOpen(isOpen: Boolean) {
+        _uiState.update { it.copy(isAdminPanelOpen = isOpen) }
+    }
+    
+    fun sendChallengeTest() {
+        // Logic to get top 10 mistake items
+        val topMistakes = MistakeVaultData.initialMistakes
+            .sortedByDescending { it.repetitionLevel } // or some criteria
+            .take(10)
+        
+        val challenge = ChallengeTest(
+            title = "اختبار تحدي سريع! 🚨",
+            description = "أكثر 10 أسئلة تكرر الخطأ فيها. هل أنت مستعد للتعويض؟",
+            questions = topMistakes
+        )
+        
+        _uiState.update { it.copy(activeChallengeTest = challenge) }
+    }
+    
+    fun dismissChallengeTest() {
+        _uiState.update { it.copy(activeChallengeTest = null) }
+    }
+
+    
+    fun updateFeedbackStatus(id: Long, status: String, reply: String) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            repository.updateFeedbackStatus(id, status, reply)
+        }
+    }
+    fun deleteFeedback(id: Long) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            repository.deleteFeedback(id)
+        }
+    }
+    fun updateQuestion(question: QuestionEntity) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            repository.updateQuestion(question)
         }
     }
 
