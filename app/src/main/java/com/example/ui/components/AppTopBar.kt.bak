@@ -142,6 +142,24 @@ fun AppTopBar(
                     }
                 }
 
+                // Admin Panel Button
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .testTag("admin_panel_btn")
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            contentDescription = "لوحة المشرف",
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
                 // Grayscale Mode Toggle
                 Surface(
                     shape = CircleShape,

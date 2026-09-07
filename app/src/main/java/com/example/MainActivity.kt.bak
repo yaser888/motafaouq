@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                                         stream = planConfig.stream,
                                         onStreamClick = { viewModel.openPlanSetupDialog() },
                                         onToggleGrayscale = { viewModel.toggleGrayscale() },
-                                        
+                                        onAdminClick = { viewModel.setAdminPanelOpen(true) },
                                         onQuickFocusClick = { viewModel.setTab(AppTab.FOCUS) }
                                     )
                                 }
@@ -345,6 +345,23 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
+                            // Intensive Study Plan Configuration Dialog
+                            
+                        if (false) {
+                            val allQuestions by viewModel.allQuestions.collectAsStateWithLifecycle(initialValue = emptyList())
+                            val allFeedbacks by viewModel.allQuestionFeedbacks.collectAsStateWithLifecycle(initialValue = emptyList())
+                            
+                                feedbacks = allFeedbacks,
+                                questions = allQuestions,
+                                planConfig = com.example.data.models.PlanConfig(),
+                                onDismiss = { viewModel.setAdminPanelOpen(false) },
+                                onUpdateFeedbackStatus = { id, status, reply -> viewModel.updateFeedbackStatus(id, status, reply) },
+                                onDeleteFeedback = { id -> viewModel.deleteFeedback(id) },
+                                onEditQuestion = { q -> viewModel.updateQuestion(q) },
+                                onOpenPlanSetup = { viewModel.setAdminPanelOpen(false); viewModel.openPlanSetupDialog() }
+                            )
+                        }
 
                         if (uiState.activeChallengeTest != null) {
                             AlertDialog(
