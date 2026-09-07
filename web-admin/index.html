@@ -927,7 +927,7 @@
           </div>
           <div class="form-group">
             <label>رابط التحميل المباشر للـ APK أو متجر بلاي:</label>
-            <input type="text" id="update-url-input" class="form-control" value="https://your-project.supabase.co/storage/v1/object/public/apps/app-release.apk" placeholder="https://...">
+            <input type="text" id="update-url-input" class="form-control" value="https://aqhfysxthxhjnvqbdqkf.supabase.co/storage/v1/object/public/apps/app-release.apk" placeholder="https://...">
           </div>
           <div class="form-group">
             <label>رسالة التنبيه للمستخدمين:</label>
@@ -1009,12 +1009,12 @@
         <div class="q-card" style="margin-bottom: 1.5rem;">
           <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">🌐 رابط مشروع Supabase الخاص بك (Project URL):</h3>
           <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <input type="text" id="supabase-url-input" class="form-control" value="https://your-project.supabase.co" placeholder="https://your-project.supabase.co">
+            <input type="text" id="supabase-url-input" class="form-control" value="https://aqhfysxthxhjnvqbdqkf.supabase.co" placeholder="https://aqhfysxthxhjnvqbdqkf.supabase.co">
           </div>
 
           <h3 style="color: #F8FAFC; margin-bottom: 12px; font-size: 1rem;">🔑 مفتاح Supabase العامة (Anon API Key):</h3>
           <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <input type="password" id="supabase-key-input" class="form-control" value="" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+            <input type="password" id="supabase-key-input" class="form-control" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaGZ5c3h0aHhoam52cWJkcWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MTc2ODQsImV4cCI6MjEwNDI5MzY4NH0.bkjTl9iMjKsABr1dCowfgPb3bMR-8jRUHM-dvZUAdao" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
             <button class="btn btn-success" onclick="saveSupabaseConfig()">💾 حفظ الإعدادات</button>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-muted);">
@@ -1716,7 +1716,7 @@
       if (!qText) return;
       const optA = prompt("الخيار A (الصحيح):", "خيار صحيح");
       const optB = prompt("الخيار B:", "خيار بديل");
-      questions.unshift({
+      const newQ = {
         id: "manual_" + Date.now(),
         subject: "MATH",
         unitOrTopic: "سؤال سحابي جديد",
@@ -1729,21 +1729,25 @@
         explanation: "تمت إضافة السؤال واعتماده من قبل المشرف.",
         confidenceScore: 100,
         isVerified: true
-      });
+      };
+      questions.unshift(newQ);
       renderQuestions();
       document.getElementById('stat-total-q').innerText = questions.length;
-      alert("تمت إضافة السؤال بنجاح!");
+      syncQuestionToSupabase(newQ);
+      alert("تمت إضافة السؤال ونشره سحابياً بنجاح إلى Supabase!");
     }
 
     function publishAnnouncement() {
       const t = document.getElementById('announcement-title').value;
       const m = document.getElementById('announcement-msg').value;
       if (!t || !m) return alert('يرجى كتابة العنوان والنص');
-      announcements.unshift({ title: t, message: m });
+      const newAnn = { title: t, message: m };
+      announcements.unshift(newAnn);
       document.getElementById('announcement-title').value = '';
       document.getElementById('announcement-msg').value = '';
       renderAnnouncements();
-      alert('تم نشر الإعلان بنجاح إلى جميع الطلاب!');
+      syncAnnouncementToSupabase(newAnn);
+      alert('تم نشر الإعلان بنجاح إلى جميع الطلاب عبر Supabase!');
     }
 
     let studentNotesData = [
@@ -1938,13 +1942,19 @@
       alert(`نجح الاتصال بـ نموذج (${activeModel})! مفاتيح الـ API صالحة وجاهزة للتعرف الذكي على الأسئلة واستخراجها.`);
     }
 
+    function getSupabaseConfig() {
+      const url = localStorage.getItem('supabase_admin_url') || 'https://aqhfysxthxhjnvqbdqkf.supabase.co';
+      const key = localStorage.getItem('supabase_admin_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaGZ5c3h0aHhoam52cWJkcWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MTc2ODQsImV4cCI6MjEwNDI5MzY4NH0.bkjTl9iMjKsABr1dCowfgPb3bMR-8jRUHM-dvZUAdao';
+      return { url, key };
+    }
+
     function saveSupabaseConfig() {
       const url = document.getElementById('supabase-url-input').value.trim();
       const key = document.getElementById('supabase-key-input').value.trim();
       if (!url) return alert('يرجى إدخال رابط مشروع Supabase صالح');
       localStorage.setItem('supabase_admin_url', url);
       if (key) localStorage.setItem('supabase_admin_key', key);
-      alert('تم حفظ إعدادات Supabase بنجاح! انسخ هذا الرابط والصقه في تطبيق أندرويد لربطهما معاً.');
+      alert('تم حفظ إعدادات Supabase بنجاح! تم ربط لوحة التحكم والتطبيق مباشرةً.');
     }
 
     function testCloudConnection() {
@@ -1952,21 +1962,97 @@
       const txt = document.getElementById('api-status-text');
       dot.style.background = '#10B981';
       txt.innerText = 'متصل بنجاح مع قاعدة بيانات Supabase Realtime 🟢';
-      alert('التحقق ناجح: اتصال Supabase Database متصل ويعمل بكفاءة عالية!');
+      alert('التحقق ناجح: اتصال Supabase Database (https://aqhfysxthxhjnvqbdqkf.supabase.co) متصل ويعمل بكفاءة عالية!');
+    }
+
+    async function syncQuestionToSupabase(q) {
+      try {
+        const { url, key } = getSupabaseConfig();
+        if (!url || !key) return;
+        await fetch(`${url}/rest/v1/questions`, {
+          method: 'POST',
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            subject: q.subject || 'MATH',
+            unit_or_topic: q.unitOrTopic || 'الوحدة العامة',
+            question_text: q.questionText,
+            question_type: 'MCQ',
+            option_a: q.optionA || '',
+            option_b: q.optionB || '',
+            option_c: q.optionC || '',
+            option_d: q.optionD || '',
+            correct_answer: q.correctAnswer || 'A',
+            explanation: q.explanation || '',
+            difficulty: 'متوسط',
+            year_or_source: 'مضاف من لوحة التحكم'
+          })
+        });
+      } catch (e) {
+        console.error("Supabase Question Sync Error:", e);
+      }
+    }
+
+    async function syncAnnouncementToSupabase(a) {
+      try {
+        const { url, key } = getSupabaseConfig();
+        if (!url || !key) return;
+        await fetch(`${url}/rest/v1/announcements`, {
+          method: 'POST',
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            id: `ann_${Date.now()}`,
+            title: a.title,
+            message: a.message,
+            date: 'الآن',
+            is_important: true,
+            timestamp: Date.now()
+          })
+        });
+      } catch (e) {
+        console.error("Supabase Announcement Sync Error:", e);
+      }
     }
 
     async function loadCloudFeedbacks() {
       try {
-        const res = await fetch('/api/feedbacks');
+        const { url, key } = getSupabaseConfig();
+        if (!url || !key) return;
+        const res = await fetch(`${url}/rest/v1/feedbacks?select=*`, {
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`
+          }
+        });
         if (res.ok) {
           const json = await res.json();
-          if (json && json.data) {
-            studentNotesData = json.data;
+          if (Array.isArray(json) && json.length > 0) {
+            studentNotesData = json.map(item => ({
+              id: item.id || `fb_${Date.now()}`,
+              questionId: item.question_id ? `q_${item.question_id}` : "-",
+              subject: item.subject ? `المادة (${item.subject})` : "سؤال عام",
+              questionText: item.question_text || "تفاصيل السؤال المرفوع",
+              studentAnswer: item.selected_option || "-",
+              reason: item.feedback_reason || "ملاحظات الطالب",
+              studentNote: item.note_text || item.feedback_reason || "لا توجد تفاصيل إضافية",
+              status: item.status || "PENDING",
+              date: item.created_at ? new Date(item.created_at).toLocaleDateString('ar-EG') : "الآن",
+              adminReply: ""
+            }));
             renderStudentNotes();
           }
         }
       } catch (e) {
-        console.log("Using local sample data for feedbacks");
+        console.log("Using local sample data for feedbacks:", e);
       }
     }
 

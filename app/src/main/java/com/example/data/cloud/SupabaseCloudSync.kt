@@ -24,11 +24,11 @@ object SupabaseCloudSync {
     private const val KEY_BASE_URL = "supabase_base_url"
     private const val KEY_ANON_KEY = "supabase_anon_key"
 
-    // Default Supabase project URL & Key placeholders
-    var baseUrl: String = "https://your-project.supabase.co"
+    // Default Supabase project URL & Key
+    var baseUrl: String = "https://aqhfysxthxhjnvqbdqkf.supabase.co"
         private set
 
-    var apiKey: String = "your-supabase-anon-key"
+    var apiKey: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxaGZ5c3h0aHhoam52cWJkcWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MTc2ODQsImV4cCI6MjEwNDI5MzY4NH0.bkjTl9iMjKsABr1dCowfgPb3bMR-8jRUHM-dvZUAdao"
         private set
 
     private val client = OkHttpClient.Builder()
